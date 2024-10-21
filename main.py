@@ -1,165 +1,126 @@
 import time
 import csv
-import re
 import numpy as np
 from pynput import keyboard
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+class KeystrokeManager:
+    def __init__(self, csv_filename):
+        self.keystroke_data = []
+        self.csv_filename = csv_filename
+        self.passwords = []
+        self.max_attempts = 5
+        self.baseline_data = []
+        self.labels = []
+        self.model = None
 
-key_press_times = {}
-key_release_times = {}
-keystroke_data = []
+    def on_press(self, key):
+        try:
+            key_char = key.char
+            press_time = time.time()
+            self.keystroke_data.append({
+                'key': key_char,
+                'press_time': press_time,
+                'release_time': None,
+                'hold_duration': None
+            })
+        except AttributeError:
+            pass
 
-csv_filename = "keystroke_data.csv"
+    def on_release(self, key):
+        release_time = time.time()
+        if self.keystroke_data:
+            last_entry = self.keystroke_data[-1]
+            if last_entry['release_time'] is None:
+                last_entry['release_time'] = release_time
+                last_entry['hold_duration'] = release_time - last_entry['press_time']
 
+        if key == keyboard.Key.enter:
+            return False
 
-def check_password_strength(password):
-    if (len(password) >= 8 and
-        re.search(r'[A-Z]', password) and
-        re.search(r'[a-z]', password) and
-        re.search(r'[0-9]', password) and
-        re.search(r'[!@#$%^&*(),.?":{}|<>]', password)):
-        return True
-    return False
+    def capture_keystrokes(self):
+        for attempt in range(self.max_attempts):
+            print(f"\nAttempt {attempt + 1}/{self.max_attempts}: Start typing your password... (Press 'Enter' to stop)")
+            self.keystroke_data.clear()
 
-def on_press(key):
-    try:
-        key_char = key.char
-        key_press_times[key_char] = time.time()
-        print(f"Key pressed: {key_char}")  # Debugging statement
-    except AttributeError:
-        pass
+            with keyboard.Listener(on_press=self.on_press, on_release=self.on_release) as listener:
+                listener.join()
 
+            password = ''.join(entry['key'] for entry in self.keystroke_data if entry['key'])
+            self.passwords.append(password)
+            print(f"Captured Password: {password}")
 
-def on_release(key):
-    try:
-        key_char = key.char
-        key_release_times[key_char] = time.time()
-        print(f"Key released: {key_char}")  # Debugging statement
-        
-        press_time = key_press_times[key_char]
-        release_time = key_release_times[key_char]
-        hold_duration = release_time - press_time
+            timings = self.extract_timings(self.keystroke_data)
+            self.baseline_data.append(timings)
+            # Label the first attempt as genuine (1) and subsequent ones as impostor (0)
+            self.labels.append(1 if attempt == 0 else 0)
 
-        if len(keystroke_data) > 0:
-            last_key_time = keystroke_data[-1]['release_time']
-            flight_time = press_time - last_key_time
+    def extract_timings(self, keystroke_data):
+        timings = []
+        for i in range(len(keystroke_data) - 1):
+            hold_duration = keystroke_data[i]['hold_duration']
+            time_between_keys = keystroke_data[i + 1]['press_time'] - keystroke_data[i]['release_time']
+            timings.extend([hold_duration, time_between_keys])
+        return np.array(timings)
+
+    def train_model(self):
+        data = np.array(self.baseline_data)
+        labels = np.array(self.labels)
+
+        if len(data) > 1:
+            X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
+            self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+            self.model.fit(X_train, y_train)
+            predictions = self.model.predict(X_test)
+            accuracy = accuracy_score(y_test, predictions)
+            print(f"Model trained with accuracy: {accuracy * 100:.2f}%")
         else:
-            flight_time = 0
+            print("Not enough data to train the model.")
+
+    def authenticate_password(self):
+        entered_password = input("Please enter your password for verification: ")
         
-        keystroke_data.append({
-            'key': key_char,
-            'press_time': press_time,
-            'release_time': release_time,
-            'hold_duration': hold_duration,
-            'flight_time': flight_time
-        })
-        print(f"Keystroke data: {keystroke_data[-1]}")  # Debugging statement
-
-    except AttributeError:
-        pass
-
-    if key == keyboard.Key.enter:
-        print("Enter key pressed. Stopping capture.")  # Debugging statement
-        return False
-
-
-def capture_keystrokes():
-    with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
-        listener.join()
-
-def extract_features(keystroke_data):
-    hold_durations = [d['hold_duration'] for d in keystroke_data]
-    flight_times = [d['flight_time'] for d in keystroke_data[1:]]  
-    return np.array(hold_durations + flight_times)
-
-
-def train_model(data, labels):
-    X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    print(f"Model trained with accuracy: {accuracy * 100:.2f}%")
-    return model
-
-
-def save_to_single_csv(password_number):
-    with open(csv_filename, 'a', newline='') as csvfile:
-        fieldnames = ['password_attempt', 'key', 'press_time', 'release_time', 'hold_duration', 'flight_time']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        
-        # Write header only once when creating a new file
-        if password_number == 1:  
-            writer.writeheader()
-
-        for entry in keystroke_data:
-            entry['password_attempt'] = password_number
-            writer.writerow(entry)
-            print(f"Writing to CSV: {entry}")  # Debugging statement
-
-# Simulate user login with multiple attempts
-def user_login(model):
-    attempts = 3
-    while attempts > 0:
-        print(f"\nYou have {attempts} attempts remaining.")
-        keystroke_data.clear()
-        print("Enter your password:")
-        password = input()
-
-        print("Start typing...")
-        capture_keystrokes()
-
-        features = extract_features(keystroke_data).reshape(1, -1)
-        prediction = model.predict(features)
-
-        if prediction[0] == 1:
-            print("Login Success!")
+        if entered_password in self.passwords:
+            print("Password verified successfully.")
             return True
         else:
-            print("Login Failed. Try again.")
-            attempts -= 1
+            print("Password verification failed.")
+            return False
 
-    print("Maximum login attempts reached.")
-    return False
+    def login_verification(self):
+        print("Start typing your password for login verification... (Press 'Enter' to stop)")
+        self.keystroke_data.clear()
 
-# Main logic for training and testing
-def main():
-    collected_data = []
-    labels = []
-    
-    # Collect 10 sets of password data and keystrokes for training
-    for i in range(5):
-        print(f"Enter password attempt {i+1}:")
-        password = input()
+        with keyboard.Listener(on_press=self.on_press, on_release=self.on_release) as listener:
+            listener.join()
 
-        if check_password_strength(password):
-            print("Password is strong.")
-            print("Now start typing the password. Press 'Enter' when done.")
-            
-            keystroke_data.clear()
-            capture_keystrokes()
-            
-            features = extract_features(keystroke_data)
-            collected_data.append(features)
-            labels.append(1)  # All data is from the genuine user, hence label as '1'
-            
-            # Save to the single CSV file
-            save_to_single_csv(i + 1)
+        attempt_timings = self.extract_timings(self.keystroke_data)
+
+        if self.model:
+            # Reshape attempt_timings to fit the model's expected input shape
+            attempt_timings = attempt_timings.reshape(1, -1)
+            prediction = self.model.predict(attempt_timings)
+            if prediction[0] == 1:
+                print("Login successful based on keystroke dynamics.")
+            else:
+                print("Login failed due to mismatched keystroke pattern.")
         else:
-            print("Password is weak. Please try again.")
-    
-    # Convert data to numpy arrays for training
-    collected_data = np.array(collected_data)
-    labels = np.array(labels)
+            print("Model not trained yet.")
 
-    # Train the model
-    model = train_model(collected_data, labels)
+def main():
+    csv_filename = "keystroke_data.csv"
+    keystroke_manager = KeystrokeManager(csv_filename)
 
-    # Simulate user login
-    user_login(model)
+    keystroke_manager.capture_keystrokes()
+    keystroke_manager.train_model()
+
+    # Authenticate the password
+    is_verified = keystroke_manager.authenticate_password()
+    if is_verified:
+        # Perform login verification using keystroke dynamics
+        keystroke_manager.login_verification()
 
 if __name__ == "__main__":
     main()
