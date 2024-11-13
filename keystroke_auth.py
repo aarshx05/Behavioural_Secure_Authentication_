@@ -61,19 +61,19 @@ def collect_keystroke_data(password):
 
     print("\nType your password and press Enter to stop.")
     reset_keystroke_data()
-
+    user_typed_password = ""
     with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
-        input("")  # Wait for user to press Enter to stop
+        user_typed_password += input("")  # Wait for user to press Enter to stop
         listener.join()
-
+   
     # Check if the password typed is valid
     if len(hold_times) != len(password_typed):
         print("\nPassword length mismatch. This attempt will be skipped.")
-        return None
+        return None,None
 
     # Calculate total typing time and return the sample
     total_time = sum(hold_times) + sum(flight_times)
-    return np.array([total_time] + hold_times + flight_times)
+    return np.array([total_time] + hold_times + flight_times), user_typed_password
 
 # Data Collection for Enrollment
 def create_user_data(user_id, password, num_samples=10):
@@ -82,8 +82,8 @@ def create_user_data(user_id, password, num_samples=10):
     attempts = 0
     while len(data) < num_samples:
         print(f"\nCollecting sample {len(data) + 1}/{num_samples}...")
-        sample = collect_keystroke_data(password)
-        if sample is not None:
+        sample, pwd = collect_keystroke_data(password)
+        if (sample is not None and pwd==password):
             data.append(sample)
         else:
             print("\nIncorrect password attempt. Please try again.")
@@ -258,13 +258,30 @@ def retrain_user_model(user_id, password, choice_train=1):
     save_user_data(user_id, model, scaler, password, combined_authentic_data, combined_synthetic_data)
     print(f"\nUser '{user_id}' model retrained successfully.")
 
+def check_password(p1,user_id):
+    model, scaler, metadata, old_authentic_data, old_synthetic_data = load_user_data(user_id)
+    if model is None or metadata is None:
+        print(f"\nUser '{user_id}' does not exist. Please register first.")
+        return
+    if p1!= metadata['password']:
+        return 0
+
+
 def verify_user(model, scaler, password, user_id):
+    chk= check_password(password,user_id)
+    if(chk==0):
+        print("Wrong Initial Password")
+        return False
     print("\nPress Enter to start typing your password for verification.")
-    new_sample = collect_keystroke_data(password)
+    new_sample, user_typed_password= collect_keystroke_data(password)
     if new_sample is None:
         print("\nPassword mismatch during verification.")
         return False
-
+    
+    chk= check_password(user_typed_password,user_id)
+    if(chk==0):
+        print("Wrong Initial Password")
+        return False
     # Scale the new sample and make predictions
     new_sample_scaled = scaler.transform([new_sample])
     prediction_prob = model.predict_proba(new_sample_scaled)[0][1]  # Get the probability of being authentic
