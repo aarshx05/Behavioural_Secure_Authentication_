@@ -26,7 +26,8 @@ This project uses various machine learning models—SVM, KNN, and Random Forest�
 10. [Data Storage and Management](#data-storage-and-management)
 11. [Privacy Note](#privacy-note)
 12. [Future Enhancements](#future-enhancements)
-13. [Demo](#demo-placeholders)
+13. [Demo](#demo)
+14. [Capturing the Demo Assets](#capturing-the-demo-assets)
 
 ---
 
@@ -55,25 +56,62 @@ The system includes:
 To get started with the Keystroke Authentication System, follow these steps:
 
 ### Prerequisites
-- Python 3.x
-- Required libraries: `numpy`, `pickle`, `sklearn`, `pynput`
-
-Install the required dependencies by running:
-```bash
-pip install numpy scikit-learn pynput
-```
+- Python 3.8 or newer
+- `numpy`, `scikit-learn`, `pynput` (`pickle` and `os` are part of the standard library and need no installation)
 
 ### Clone the Repository
 ```bash
 git clone https://github.com/aarshx05/Behavioural_Secure_Authentication_.git
-cd Behavioural_Secure_Authentication
+cd Behavioural_Secure_Authentication_
+```
+
+> Note the trailing underscore in the directory name — it is part of the repository name.
+
+### Install dependencies
+
+A virtual environment is recommended so the packages do not land in your system Python:
+
+```bash
+python -m venv .venv
+
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
 ### Running the Program
-You can launch the program using Python from your terminal or command prompt:
 ```bash
 python keystroke_auth.py
 ```
+
+You should see the menu:
+
+```plaintext
+Welcome to the Keystroke Authentication System!
+
+Select an option:
+1. Register a new user
+2. Retrain an existing user model
+3. Verify an existing user
+4. Profile status and drift report
+5. Exit
+```
+
+### Platform notes
+
+`pynput` reads keystrokes globally, which some operating systems restrict:
+
+| Platform | Requirement |
+|---|---|
+| Windows | Works out of the box. If launched from an elevated terminal, keystrokes from non-elevated windows may not register |
+| macOS | Grant your terminal **Input Monitoring** and **Accessibility** permission under System Settings → Privacy & Security, then restart the terminal |
+| Linux | Requires an X11 session. Under Wayland, `pynput` cannot capture global key events — run in an Xorg session, or use `XDG_SESSION_TYPE=x11` |
+| SSH / headless | Not supported — there is no keyboard to read |
+
+Type the password into the **same terminal window** that is running the program. The password is echoed as you type, so avoid capturing your real password in screen recordings — use a throwaway password for any demo.
 
 ## Usage
 
@@ -125,11 +163,11 @@ For testing purposes, you can log in using a pre-existing user profile with the 
 
 Try logging in with this profile to see how the system works in real-time.
 
+> This profile predates the extended feature set, so it loads as **schema v1** and verifies against the original feature layout. It will not show contextual risk, adaptive learning or drift reporting — those need a v2 profile. Register a new user (or retrain this one, which offers to upgrade it) to exercise the newer features, and for any demo captures.
+
 ---
 
 ## System Architecture
-
-The following flowchart demonstrates the overall system architecture:
 
 Verification runs as two independent layers. The biometric layer decides **how**
 the password was typed; the contextual layer decides whether **where and when**
@@ -349,21 +387,170 @@ The system is functional, but there are several areas for improvement:
 
 ---
 
-## Demo Placeholders
+## Demo
 
-### Screenshot Example
+> **Status:** the captures below are placeholders. See [Capturing the demo assets](#capturing-the-demo-assets) for exactly what to record and when.
 
-Here's a placeholder for a screenshot of the CLI in action:
+### 1. Registration
 
-![CLI Example](![image](https://github.com/user-attachments/assets/bdfad6e9-abe3-4607-bf9a-39d782dad469))
+Enrolling a new user. Ten samples are collected, then the model and the first context snapshot are stored.
 
-### Video Demo Placeholder
+<!-- REPLACE: drag 01-registration.png onto the PR/issue comment box and paste the generated URL here -->
+![Registration](https://placehold.co/900x420?text=01+registration.png)
 
-A video demonstration of the system in action.
+### 2. Successful verification
 
+The genuine user from their own machine. Note the three reported values: biometric score, required score, and contextual risk.
 
-https://github.com/user-attachments/assets/b014b3cb-87a7-4c23-8adc-e27134c701ee
+<!-- REPLACE: 02-verify-success.png -->
+![Successful verification](https://placehold.co/900x300?text=02+verify-success.png)
 
+### 3. Impostor rejected
+
+Someone else typing the **correct password**. The password check passes; the biometric layer is what stops them.
+
+<!-- REPLACE: 03-impostor-rejected.png -->
+![Impostor rejected](https://placehold.co/900x300?text=03+impostor-rejected.png)
+
+### 4. Unrecognised device or network
+
+Correct password *and* correct typing rhythm, but from a network the profile has never seen. The required score rises above the base threshold.
+
+<!-- REPLACE: 04-risk-elevated.png -->
+![Elevated contextual risk](https://placehold.co/900x300?text=04+risk-elevated.png)
+
+### 5. Adaptive learning
+
+A confident, low-risk login is folded back into the profile; after a few of these the model refits itself.
+
+<!-- REPLACE: 05-adaptive-learning.png -->
+![Adaptive learning](https://placehold.co/900x320?text=05+adaptive-learning.png)
+
+### 6. Profile status and drift report
+
+Option 4: window size and age span, sample sources, current threshold, template drift, devices seen, and the drift verdict.
+
+<!-- REPLACE: 06-status-report.png -->
+![Profile status](https://placehold.co/900x480?text=06+status-report.png)
+
+### 7. Drift detected from rejected attempts
+
+After the user's typing has changed, repeated rejections are diagnosed as drift rather than as an attack.
+
+<!-- REPLACE: 07-drift-detected.png -->
+![Drift detected](https://placehold.co/900x340?text=07+drift-detected.png)
+
+### 8. Recovery after retraining
+
+Option 2 rebuilds the profile around current typing, and the previously-rejected user verifies cleanly again.
+
+<!-- REPLACE: 08-retrain-recovery.png -->
+![Retrain recovery](https://placehold.co/900x380?text=08+retrain-recovery.png)
+
+### Full walkthrough
+
+<!-- REPLACE: drag demo-walkthrough.mp4 onto the comment box and paste the generated URL on its own line -->
+_Video placeholder — a single recording covering register → verify → impostor → status → drift → retrain._
+
+---
+
+## Capturing the demo assets
+
+### Before you start
+
+```bash
+# Use a throwaway password - it is echoed on screen and will be visible in captures
+# Suggested: Demo!Pass#2026
+
+# Start from a clean slate so the walkthrough is reproducible
+# (this deletes local profiles - skip if you have data you want to keep)
+rm -rf user_data/demo        # macOS / Linux
+Remove-Item -Recurse -Force user_data\demo   # Windows PowerShell
+```
+
+Set your terminal to roughly **100×30** characters with a readable font size before recording. Keep the whole prompt-and-output block visible in one frame.
+
+### What to capture, and exactly when
+
+| # | Asset | Menu option | Capture at the moment... |
+|---|---|---|---|
+| 1 | `01-registration.png` | 1 | The `registered successfully` block appears, showing features per sample, sample count, negatives, and the context line |
+| 2 | `02-verify-success.png` | 3 | `User verified successfully!` appears — include the three score lines above it |
+| 3 | `03-impostor-rejected.png` | 3 | `User verification failed` appears after **someone else** typed the password |
+| 4 | `04-risk-elevated.png` | 3 | `Context risk : elevated/high` appears with a `Required score` above the base |
+| 5 | `05-adaptive-learning.png` | 3 | `This sample was added to your profile` and ideally `Profile automatically retrained` appear |
+| 6 | `06-status-report.png` | 4 | The full profile block is on screen, including `template drift` and `drift` lines |
+| 7 | `07-drift-detected.png` | 3 | `Your typing appears to have changed:` appears after ~3 rejected attempts |
+| 8 | `08-retrain-recovery.png` | 2 then 3 | The retrain summary, then a successful verification immediately after |
+
+### Step-by-step
+
+**Registration — asset 1**
+
+1. `python keystroke_auth.py` → `1`
+2. User ID `demo`, password `Demo!Pass#2026`, model choice `1`
+3. Type the password 10 times, pressing Enter each time. **Type naturally** — a rhythm you can reproduce later
+4. Screenshot the success block
+
+**Verification — asset 2**
+
+5. Menu → `3`, user `demo`, same password, type it once
+6. Screenshot the score block plus `User verified successfully!`
+
+**Impostor — asset 3**
+
+7. Ask someone else to sit at the keyboard. Menu → `3`, enter user `demo` and the password yourself, then let **them** type the password at the capture prompt
+8. Screenshot the failure
+
+> No second person available? Type it deliberately differently — one finger, hunting for each key, with long pauses. That is a genuinely different rhythm and will score low.
+
+**Elevated risk — asset 4**
+
+9. Change your network so the subnet differs — switching Wi-Fi to a **phone hotspot** is the easiest way. Alternatively run the project on a second machine, copying the `user_data/demo` folder across
+10. Menu → `3` and verify normally
+11. Screenshot the `Context risk : ... new network (...)` line with the raised `Required score`
+
+> The risk layer compares against contexts already seen. Registering and verifying on the same machine and network always scores `low` — you must actually change something for this asset.
+
+**Adaptive learning — asset 5**
+
+12. Return to your normal network. Run option `3` about **five times**, typing consistently
+13. Screenshot a run showing `This sample was added to your profile`, ideally one that also prints `Profile automatically retrained on your recent typing`
+
+**Status report — asset 6**
+
+14. Menu → `4`, enter `demo`
+15. Screenshot the whole block
+
+**Drift — asset 7**
+
+Natural drift takes months. To stage it honestly, change your typing the way months of practice would:
+
+16. Run option `3` and type the password **noticeably faster** than you enrolled it — the speed muscle memory eventually gives you. Repeat until it fails
+17. After roughly the third consecutive failure, screenshot the `Your typing appears to have changed:` message with its measured `sd` shift and percentage
+
+> Typing *inconsistently* instead — different rhythm each attempt — produces the `Warning: ... looks like different people` message. That is asset 7's counterpart and worth capturing too if you want to show both branches.
+
+**Recovery — asset 8**
+
+18. Menu → `2`, user `demo`, password, model choice `1`, then type the password 5 times **at the new faster speed**
+19. Screenshot the retrain summary
+20. Menu → `3` and verify at the faster speed — it should now pass. Screenshot
+
+**Video walkthrough**
+
+Record steps 1–20 as one continuous take, roughly 3–5 minutes. Windows: `Win + Alt + R` (Xbox Game Bar) or OBS. macOS: `Cmd + Shift + 5`. Linux: OBS or `SimpleScreenRecorder`. Pause a beat on each result block so viewers can read the scores.
+
+### Adding them to the README
+
+GitHub does not serve images from a repo path in the way most people expect, and committing binaries bloats the history. The simplest reliable route:
+
+1. Open any issue or PR comment box on the repository
+2. Drag each file in — GitHub uploads it and inserts a `https://github.com/user-attachments/assets/...` URL
+3. Copy that URL into the matching `REPLACE` slot above, then **close the comment without submitting it**
+4. For the video, paste the URL on its own line — GitHub renders it as an inline player
+
+Keep screenshots under ~1 MB and the video under GitHub's 10 MB attachment limit; trim or lower the resolution if needed.
 
 ---
 
