@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keystroke Authentication</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Keystroke Authentication</h1>
+    <p class="sub">Behavioural biometrics &middot; typing rhythm + contextual risk</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-panel="register">Register</button>
+    <button class="tab" data-panel="verify">Verify</button>
+    <button class="tab" data-panel="retrain">Retrain</button>
+    <button class="tab" data-panel="profiles">Profiles</button>
+    <button class="tab" data-panel="context">Context</button>
+  </nav>
+
+  <main>
+    <!-- ---------------------------------------------------------- Register -->
+    <section id="register" class="panel active">
+      <h2>Register a new user</h2>
+      <p class="hint">
+        You will type the password <strong>{{ enroll_samples }} times</strong> so the system can
+        learn your rhythm. Type it the way you naturally would &mdash; the rhythm matters more
+        than the speed. Backspace is allowed.
+      </p>
+
+      <div class="row">
+        <label>User ID <input type="text" id="reg-user" placeholder="e.g. demo" autocomplete="off"></label>
+        <label>Password <input type="password" id="reg-pass" autocomplete="new-password"></label>
+        <label>Model
+          <select id="reg-model">
+            <option value="1">1 &ndash; Harsh (stricter)</option>
+            <option value="2" selected>2 &ndash; Easy (more forgiving)</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="reg-start" class="primary">Start enrollment</button>
+
+      <div id="reg-capture" class="capture hidden">
+        <div class="progress"><div id="reg-bar" class="bar"></div></div>
+        <p class="counter"><span id="reg-count">0</span> / {{ enroll_samples }} samples captured</p>
+        <input type="password" id="reg-input" class="typebox" placeholder="Type the password, then press Enter" autocomplete="off">
+        <p id="reg-feedback" class="feedback"></p>
+      </div>
+
+      <div id="reg-result" class="result hidden"></div>
+    </section>
+
+    <!-- ------------------------------------------------------------ Verify -->
+    <section id="verify" class="panel">
+      <h2>Verify</h2>
+      <p class="hint">Type the password once. Both your typing rhythm and the context you are
+        connecting from are scored.</p>
+
+      <div class="row">
+        <label>User ID <input type="text" id="ver-user" placeholder="e.g. demo" autocomplete="off"></label>
+        <label>Password <input type="password" id="ver-pass" autocomplete="current-password"></label>
+      </div>
+
+      <input type="password" id="ver-input" class="typebox" placeholder="Type the password, then press Enter" autocomplete="off">
+      <p id="ver-feedback" class="feedback"></p>
+
+      <div id="ver-result" class="result hidden"></div>
+    </section>
+
+    <!-- ----------------------------------------------------------- Retrain -->
+    <section id="retrain" class="panel">
+      <h2>Retrain</h2>
+      <p class="hint">
+        Typing changes over time. Retraining rebuilds the profile around how you type
+        <em>now</em>, and re-anchors the template.
+      </p>
+
+      <div class="row">
+        <label>User ID <input type="text" id="ret-user" placeholder="e.g. demo" autocomplete="off"></label>
+        <label>Password <input type="password" id="ret-pass" autocomplete="current-password"></label>
+        <label>Samples <input type="number" id="ret-n" value="5" min="1" max="20"></label>
+      </div>
+
+      <button id="ret-start" class="primary">Start retraining</button>
+
+      <div id="ret-capture" class="capture hidden">
+        <div class="progress"><div id="ret-bar" class="bar"></div></div>
+        <p class="counter"><span id="ret-count">0</span> / <span id="ret-total">5</span> samples captured</p>
+        <input type="password" id="ret-input" class="typebox" placeholder="Type the password, then press Enter" autocomplete="off">
+        <p id="ret-feedback" class="feedback"></p>
+      </div>
+
+      <div id="ret-result" class="result hidden"></div>
+    </section>
+
+    <!-- ---------------------------------------------------------- Profiles -->
+    <section id="profiles" class="panel">
+      <h2>Profiles</h2>
+      <button id="prof-refresh">Refresh</button>
+      <div id="prof-list" class="profile-list"></div>
+      <div id="prof-detail" class="result hidden"></div>
+    </section>
+
+    <!-- ----------------------------------------------------------- Context -->
+    <section id="context" class="panel">
+      <h2>Captured context</h2>
+      <p class="hint">
+        These attributes are recorded with every sample and scored as a
+        <strong>second layer</strong> alongside your typing rhythm. They are deliberately
+        kept out of the machine learning feature vector &mdash; during enrollment they never
+        change, so a classifier would simply learn &ldquo;this IP means authentic&rdquo;,
+        which is trivially spoofed and breaks the moment you switch network.
+      </p>
+      <button id="ctx-refresh">Refresh</button>
+      <div id="ctx-detail" class="result hidden"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Keystrokes are timed in your browser and never leave it as raw text beyond the password
+      you are authenticating with. Profiles are stored locally on the server.</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
