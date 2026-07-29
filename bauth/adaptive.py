@@ -468,9 +468,12 @@ def status(profile):
         c.get("hostname", "unknown") for c in profile.context_history if c
     }
 
+    schema = f"v{profile.schema_version}" + (" (legacy)" if profile.is_legacy else "")
+    if profile.sklearn_version_mismatch:
+        schema += " - model built by a different scikit-learn version; retrain to rebuild"
+
     return {
-        "schema": f"v{profile.schema_version}"
-        + (" (legacy)" if profile.is_legacy else ""),
+        "schema": schema,
         "features": f"{profile.feature_dim} "
         + ("extended" if profile.extended else "legacy v1"),
         "samples": f"{profile.sample_count}/{config.MAX_AUTHENTIC_SAMPLES}",
