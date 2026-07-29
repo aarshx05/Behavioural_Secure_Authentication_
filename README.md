@@ -12,7 +12,8 @@ This project uses various machine learning models—SVM, KNN, and Random Forest�
 1. [Introduction](#introduction)
 2. [Features](#features)
 3. [Installation](#installation)
-4. [Usage](#usage)
+4. [Web Dashboard](#web-dashboard)
+5. [Usage](#usage)
    - [Registering a New User](#registering-a-new-user)
    - [Retraining the User Model](#retraining-the-user-model)
    - [Profile Status and Drift](#profile-status-and-drift)
@@ -27,7 +28,8 @@ This project uses various machine learning models—SVM, KNN, and Random Forest�
 11. [Privacy Note](#privacy-note)
 12. [Future Enhancements](#future-enhancements)
 13. [Demo](#demo)
-14. [Capturing the Demo Assets](#capturing-the-demo-assets)
+14. [Reproducing the Demo](#reproducing-the-demo)
+15. [Evaluation Status](#evaluation-status)
 
 ---
 
@@ -83,11 +85,15 @@ pip install -r requirements.txt
 ```
 
 ### Running the Program
+
+Two interfaces are available. **The web dashboard is the recommended one** — see [Web Dashboard](#web-dashboard) for why.
+
 ```bash
-python keystroke_auth.py
+python webapp.py          # web dashboard at http://127.0.0.1:5000
+python keystroke_auth.py  # terminal interface
 ```
 
-You should see the menu:
+The terminal interface shows this menu:
 
 ```plaintext
 Welcome to the Keystroke Authentication System!
@@ -100,7 +106,41 @@ Select an option:
 5. Exit
 ```
 
+---
+
+## Web Dashboard
+
+```bash
+python webapp.py
+```
+
+Then open <http://127.0.0.1:5000>. Four tabs: **Register**, **Verify**, **Retrain**, **Profiles**.
+
+Everything below the transport layer — features, models, risk, drift, storage — is shared with the CLI. Only the way keystrokes are captured differs, and that difference matters:
+
+| | Terminal (`keystroke_auth.py`) | Browser (`webapp.py`) |
+|---|---|---|
+| Timing source | `pynput` global keyboard hook | `keydown` / `keyup` events |
+| OS permissions | Accessibility / Input Monitoring on macOS | None |
+| Wayland / headless | Unsupported | Works anywhere a browser runs |
+| Password on screen | Echoed in the terminal | Masked (`type="password"`) |
+| Startup race | Hook must be live before typing | None — listeners attach synchronously |
+| Clock | `time.time()` | `performance.now()`, monotonic |
+
+The browser also gives per-sample progress, a score meter showing where you landed relative to the required threshold, and the contextual risk factors as a list.
+
+Two details worth knowing:
+
+- **Auto-repeat is ignored.** Holding a key fires `keydown` repeatedly, but only one physical press occurred.
+- **Paste is blocked** in the typing boxes. A pasted password produces a flawless-looking sample containing no keystrokes at all.
+
+If you serve the dashboard beyond `localhost` (`--host 0.0.0.0`), the risk layer uses the *client's* address and user agent rather than the server's, so remote logins are scored against the device they actually came from. Note that this is Flask's development server and the password is sent in the request body — put it behind TLS before exposing it to a real network.
+
+---
+
 ### Platform notes
+
+These apply to the **terminal** interface only; the web dashboard has none of these constraints.
 
 `pynput` reads keystrokes globally, which some operating systems restrict:
 
@@ -375,9 +415,7 @@ The system is functional, but there are several areas for improvement:
 
 1. **Hash the stored password**: `metadata.pkl` still holds the password in plaintext, which is a significant weakness in an authentication project. It should be salted and hashed.
 
-2. **Graphical User Interface (GUI)**: Currently, the system uses a CLI. Adding a GUI will make the system more user-friendly.
-
-3. **Advanced User Feedback**: Implement real-time feedback on typing patterns and suggestions to help users adjust their typing for better recognition.
+2. **Advanced User Feedback**: Real-time feedback on typing patterns, and suggestions to help users adjust their typing for better recognition.
 
 4. **Real impostor data**: Negatives are currently synthetic. Evaluating against genuine impostor attempts — other people typing the same password — would give trustworthy FAR/FRR figures.
 
@@ -389,168 +427,125 @@ The system is functional, but there are several areas for improvement:
 
 ## Demo
 
-> **Status:** the captures below are placeholders. See [Capturing the demo assets](#capturing-the-demo-assets) for exactly what to record and when.
+All screenshots are from the web dashboard, captured on Windows 11. Some device identifiers are redacted.
 
-### 1. Registration
+### 1. The dashboard
 
-Enrolling a new user. Ten samples are collected, then the model and the first context snapshot are stored.
+![Register tab of the dashboard, showing the user ID, password and model fields](docs/images/01-dashboard.png)
 
-<!-- REPLACE: drag 01-registration.png onto the PR/issue comment box and paste the generated URL here -->
-![Registration](https://placehold.co/900x420?text=01+registration.png)
+Five tabs: Register, Verify, Retrain, Profiles and Context. The model selector chooses between the **Harsh** (stricter) and **Easy** (more forgiving) presets, which differ in regularisation, neighbour count and tree depth.
 
-### 2. Successful verification
+### 2. Enrollment
 
-The genuine user from their own machine. Note the three reported values: biometric score, required score, and contextual risk.
+![Enrollment in progress, progress bar at 6 of 10 samples with the message "Captured. 4 to go."](docs/images/02-enrollment.png)
 
-<!-- REPLACE: 02-verify-success.png -->
-![Successful verification](https://placehold.co/900x300?text=02+verify-success.png)
+The password is typed ten times. Each accepted sample advances the bar; a mistyped or incompletely captured attempt is rejected with a reason and does not count. The field is `type="password"`, so nothing is echoed on screen, and paste is blocked — a pasted password would produce a flawless-looking sample containing no keystrokes at all.
 
-### 3. Impostor rejected
+### 3. Profile built
 
-Someone else typing the **correct password**. The password check passes; the biometric layer is what stops them.
+![Registration result showing 10 samples, 52 features per sample, 80 synthetic negatives, Easy preset, starting threshold 0.4](docs/images/03-registered.png)
 
-<!-- REPLACE: 03-impostor-rejected.png -->
-![Impostor rejected](https://placehold.co/900x300?text=03+impostor-rejected.png)
+The 10-character password yields **52 features** per sample (`4n + 12`) and **80 synthetic negatives** at the 8:1 ratio. Note the imbalance this implies — 52 dimensions learned from 10 genuine samples. See [Evaluation status](#evaluation-status).
 
-### 4. Unrecognised device or network
+### 4. Genuine verification
 
-Correct password *and* correct typing rhythm, but from a network the profile has never seen. The required score rises above the base threshold.
+![Successful verification scoring 96.8% against a required 40.0%, with low context risk and a note that the sample was added to the profile](docs/images/04-verified.png)
 
-<!-- REPLACE: 04-risk-elevated.png -->
-![Elevated contextual risk](https://placehold.co/900x300?text=04+risk-elevated.png)
+Scored **96.8%** against the required **40.0%**. The meter shows where the score landed; the tick mark is the threshold. Context risk is `low` because the device and network match what the profile has already seen.
 
-### 5. Adaptive learning
+The note *"This sample was added to your profile"* is adaptive learning: the score cleared both the absolute floor and the margin over the required bar, and the context was ordinary, so the sample became training data. Five such adoptions trigger an automatic refit.
 
-A confident, low-risk login is folded back into the profile; after a few of these the model refits itself.
+### 5. Impostor rejected
 
-<!-- REPLACE: 05-adaptive-learning.png -->
-![Adaptive learning](https://placehold.co/900x320?text=05+adaptive-learning.png)
+![Rejected verification scoring 1.7% against a required 40.0%](docs/images/05-rejected.png)
 
-### 6. Profile status and drift report
+The same correct password typed with a deliberately different rhythm — one finger, hunting for each key. Scored **1.7%**.
 
-Option 4: window size and age span, sample sources, current threshold, template drift, devices seen, and the drift verdict.
+The interesting part is *why*. Compare the two attempts:
 
-<!-- REPLACE: 06-status-report.png -->
-![Profile status](https://placehold.co/900x480?text=06+status-report.png)
+| | Genuine | Impostor |
+|---|---|---|
+| Keys | 10 | 10 |
+| Total time | 4,060 ms | 22,212 ms |
+| Mean dwell | 87.1 ms | 101.3 ms |
 
-### 7. Drift detected from rejected attempts
+Mean dwell barely moved — about 16% — while total time grew **5.5×**. Nearly all of the discrimination came from the intervals *between* keys, not from how long each key was held. This is what the `shuffle` negatives are for: they keep the tempo and scramble the order, forcing the model to learn rhythm rather than raw speed.
 
-After the user's typing has changed, repeated rejections are diagnosed as drift rather than as an attack.
+### 6. What context is captured
 
-<!-- REPLACE: 07-drift-detected.png -->
-![Drift detected](https://placehold.co/900x340?text=07+drift-detected.png)
+![Context tab listing network, device and clock attributes including local IP, subnet, hostname, OS, timezone and device fingerprint](docs/images/06-context.png)
 
-### 8. Recovery after retraining
+Everything the risk layer can see, grouped into network, device and clock. Public IP shows `not collected (opt-in)` because the lookup contacts a third-party service and is disabled by default. Keyboard layout reads `not visible` because the browser does not expose it — the terminal interface can read it, the web one cannot, and the field says so rather than guessing.
 
-Option 2 rebuilds the profile around current typing, and the previously-rejected user verifies cleanly again.
+These attributes are **not** in the machine learning feature vector. See [Why context is not in the feature vector](#why-context-is-not-in-the-feature-vector).
 
-<!-- REPLACE: 08-retrain-recovery.png -->
-![Retrain recovery](https://placehold.co/900x380?text=08+retrain-recovery.png)
+### 7. Context attached to a verification
 
-### Full walkthrough
+![Verification result with both drawers expanded, showing typing measurements and the full context table](docs/images/07-verify-context.png)
 
-<!-- REPLACE: drag demo-walkthrough.mp4 onto the comment box and paste the generated URL on its own line -->
-_Video placeholder — a single recording covering register → verify → impostor → status → drift → retrain._
+Each verification records the exact context it was scored against, alongside what was measured about the typing itself — key count, total duration, mean dwell and any corrections. This is what the risk layer compares on the next login.
+
+### 8. Profile status and drift
+
+![Profiles tab showing three users and the detail view for user 03](docs/images/08-profile-status.png)
+
+Three profiles: two current and `1`, the bundled demo profile, correctly flagged **legacy v1**.
+
+The detail view shows the window (`11/60`), where the samples came from (`auto=1, enroll=10`), the current threshold, and two separate drift measurements:
+
+- **`template drift: 0.08 sd from anchor (limit 2.5)`** — how far the profile has moved from its last password-verified state. This is the anti-poisoning bound.
+- **`drift: Typing is stable (mean shift 0.86 sd, 9.4% faster)`** — whether the user's rhythm is changing over time.
+
+`rejections: 0 recent rejection(s) with the correct password` is the third signal: repeated rejections by someone who knows the password are analysed separately, because drift measured over stored samples can only see logins that were *accepted*.
+
+### 9. Retraining
+
+![Retrain result showing a 13-sample window, 52 effective positives after recency weighting, 104 synthetic negatives and 0.753 sd drift before retrain](docs/images/09-retrained.png)
+
+Retraining rebuilds the profile around current typing and re-anchors the template.
+
+**Effective positives (52) exceed the window size (13)** because recent samples are replicated up to 4× — that is how recency weighting is applied. It is done by replication rather than `sample_weight` because `VotingClassifier` only forwards sample weights when *every* estimator accepts them, and `KNeighborsClassifier` does not.
+
+`drift before retrain: 0.753 sd` records how far the typing had moved before the rebuild.
 
 ---
 
-## Capturing the demo assets
-
-### Before you start
+## Reproducing the demo
 
 ```bash
-# Use a throwaway password - it is echoed on screen and will be visible in captures
-# Suggested: Demo!Pass#2026
-
-# Start from a clean slate so the walkthrough is reproducible
-# (this deletes local profiles - skip if you have data you want to keep)
-rm -rf user_data/demo        # macOS / Linux
-Remove-Item -Recurse -Force user_data\demo   # Windows PowerShell
+python webapp.py     # then open http://127.0.0.1:5000
 ```
 
-Set your terminal to roughly **100×30** characters with a readable font size before recording. Keep the whole prompt-and-output block visible in one frame.
+Use a throwaway password — one with a capital and a symbol exercises the Shift handling. Register, then verify a few times.
 
-### What to capture, and exactly when
+Three cases will not occur on their own:
 
-| # | Asset | Menu option | Capture at the moment... |
-|---|---|---|---|
-| 1 | `01-registration.png` | 1 | The `registered successfully` block appears, showing features per sample, sample count, negatives, and the context line |
-| 2 | `02-verify-success.png` | 3 | `User verified successfully!` appears — include the three score lines above it |
-| 3 | `03-impostor-rejected.png` | 3 | `User verification failed` appears after **someone else** typed the password |
-| 4 | `04-risk-elevated.png` | 3 | `Context risk : elevated/high` appears with a `Required score` above the base |
-| 5 | `05-adaptive-learning.png` | 3 | `This sample was added to your profile` and ideally `Profile automatically retrained` appear |
-| 6 | `06-status-report.png` | 4 | The full profile block is on screen, including `template drift` and `drift` lines |
-| 7 | `07-drift-detected.png` | 3 | `Your typing appears to have changed:` appears after ~3 rejected attempts |
-| 8 | `08-retrain-recovery.png` | 2 then 3 | The retrain summary, then a successful verification immediately after |
+| Case | How to produce it |
+|---|---|
+| **Impostor** | Have someone else type it, or type it one-finger with long pauses |
+| **Elevated risk** | Change network — a phone hotspot changes the subnet. Or run `python webapp.py --host 0.0.0.0` and open it from your phone, which the risk layer sees as a different client |
+| **Drift** | Real drift takes months. Type noticeably faster than you enrolled and repeat until it fails; the drift verdict appears around the third consecutive failure |
 
-### Step-by-step
+Typing *inconsistently* instead — a different rhythm each attempt — produces the `attack` verdict rather than `drift`. Both branches are worth seeing.
 
-**Registration — asset 1**
+---
 
-1. `python keystroke_auth.py` → `1`
-2. User ID `demo`, password `Demo!Pass#2026`, model choice `1`
-3. Type the password 10 times, pressing Enter each time. **Type naturally** — a rhythm you can reproduce later
-4. Screenshot the success block
+## Evaluation status
 
-**Verification — asset 2**
+**The numbers in this README come from synthetic impostors, not real ones.** They should be read as demonstrations that the system works end to end, not as security claims.
 
-5. Menu → `3`, user `demo`, same password, type it once
-6. Screenshot the score block plus `User verified successfully!`
+The classifier is trained on negatives generated from the user's own samples. Any measured separation therefore describes how well it distinguishes real typing from *that generator*, which is not the same question as how well it resists a human attacker. The 96.8% / 1.7% split above is a real measurement of a real typing difference, but it is one person, one password, one session.
 
-**Impostor — asset 3**
+Not yet done, in rough order of importance:
 
-7. Ask someone else to sit at the keyboard. Menu → `3`, enter user `demo` and the password yourself, then let **them** type the password at the capture prompt
-8. Screenshot the failure
+- **No FAR / FRR / EER or ROC/DET curves.** These are the standard metrics for the field and none are reported.
+- **No real impostor data.** Other people typing the same password is what a test set has to be.
+- **No public benchmark.** The CMU keystroke dynamics dataset (Killourhy & Maxion, DSN 2009 — 51 subjects × 400 repetitions) is the usual reference point, and GREYC and Clarkson II exist for cross-dataset and longitudinal work.
+- **No baselines.** Killourhy & Maxion found scaled Manhattan distance reached roughly 0.096 EER, beating several ML classifiers. An ensemble that cannot beat a distance metric would be worth knowing about.
+- **No held-out evaluation.** Training uses the whole window; there is no cross-validation.
+- **Roughly 30 hand-set constants** in `bauth/config.py` — negative ratio, drift thresholds, adoption bars, risk weights — tuned against simulated typists rather than fitted to data.
 
-> No second person available? Type it deliberately differently — one finger, hunting for each key, with long pauses. That is a genuinely different rhythm and will score low.
-
-**Elevated risk — asset 4**
-
-9. Change your network so the subnet differs — switching Wi-Fi to a **phone hotspot** is the easiest way. Alternatively run the project on a second machine, copying the `user_data/demo` folder across
-10. Menu → `3` and verify normally
-11. Screenshot the `Context risk : ... new network (...)` line with the raised `Required score`
-
-> The risk layer compares against contexts already seen. Registering and verifying on the same machine and network always scores `low` — you must actually change something for this asset.
-
-**Adaptive learning — asset 5**
-
-12. Return to your normal network. Run option `3` about **five times**, typing consistently
-13. Screenshot a run showing `This sample was added to your profile`, ideally one that also prints `Profile automatically retrained on your recent typing`
-
-**Status report — asset 6**
-
-14. Menu → `4`, enter `demo`
-15. Screenshot the whole block
-
-**Drift — asset 7**
-
-Natural drift takes months. To stage it honestly, change your typing the way months of practice would:
-
-16. Run option `3` and type the password **noticeably faster** than you enrolled it — the speed muscle memory eventually gives you. Repeat until it fails
-17. After roughly the third consecutive failure, screenshot the `Your typing appears to have changed:` message with its measured `sd` shift and percentage
-
-> Typing *inconsistently* instead — different rhythm each attempt — produces the `Warning: ... looks like different people` message. That is asset 7's counterpart and worth capturing too if you want to show both branches.
-
-**Recovery — asset 8**
-
-18. Menu → `2`, user `demo`, password, model choice `1`, then type the password 5 times **at the new faster speed**
-19. Screenshot the retrain summary
-20. Menu → `3` and verify at the faster speed — it should now pass. Screenshot
-
-**Video walkthrough**
-
-Record steps 1–20 as one continuous take, roughly 3–5 minutes. Windows: `Win + Alt + R` (Xbox Game Bar) or OBS. macOS: `Cmd + Shift + 5`. Linux: OBS or `SimpleScreenRecorder`. Pause a beat on each result block so viewers can read the scores.
-
-### Adding them to the README
-
-GitHub does not serve images from a repo path in the way most people expect, and committing binaries bloats the history. The simplest reliable route:
-
-1. Open any issue or PR comment box on the repository
-2. Drag each file in — GitHub uploads it and inserts a `https://github.com/user-attachments/assets/...` URL
-3. Copy that URL into the matching `REPLACE` slot above, then **close the comment without submitting it**
-4. For the video, paste the URL on its own line — GitHub renders it as an inline player
-
-Keep screenshots under ~1 MB and the video under GitHub's 10 MB attachment limit; trim or lower the resolution if needed.
+The adaptive retraining and template-drift bound are the parts most worth studying properly, since template aging is an open problem and the poisoning bound is currently asserted rather than measured against an adaptive adversary.
 
 ---
 
