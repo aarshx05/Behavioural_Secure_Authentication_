@@ -13,22 +13,24 @@ def _collect_samples(password, count, extended, purpose="enrollment"):
     """
     collected = []
     attempts = 0
-    limit = count * 2
+    limit = count * 3 + 5  # generous: a mistyped sample costs nothing but time
+
+    print(f"\nType the password {count} times for {purpose}.")
+    print("Type it the way you naturally would - the rhythm is what is learned.")
+    print("Backspace works; press Enter after each attempt.\n")
 
     while len(collected) < count:
-        print(f"\nCollecting sample {len(collected) + 1}/{count} for {purpose}...")
+        print(f"[{len(collected) + 1}/{count}]")
         recorder, typed, context = capture.collect_keystroke_data(password)
         attempts += 1
 
-        if recorder is not None and typed == password:
+        if recorder is not None:
             collected.append((features.from_capture(recorder, extended=extended), context))
-            if recorder.corrections:
-                print(f"  (noted {recorder.corrections} correction(s))")
-        else:
-            print("Incorrect password attempt. Please try again.")
+            note = f"  captured{f' ({recorder.corrections} correction(s))' if recorder.corrections else ''}"
+            print(note)
 
         if attempts >= limit:
-            print("\nToo many incorrect attempts.")
+            print(f"\nStopping after {attempts} attempts with {len(collected)} good samples.")
             break
 
     return collected
@@ -138,10 +140,10 @@ def verify_user():
         print("\nWrong initial password.")
         return
 
-    print("\nPress Enter to start typing your password for verification.")
-    recorder, typed, context = capture.collect_keystroke_data(password, prompt=False)
-    if recorder is None or typed != password:
-        print("\nPassword mismatch during verification.")
+    print("\nNow type the password the way you normally do.")
+    recorder, typed, context = capture.collect_keystroke_data(password)
+    if recorder is None:
+        print("\nVerification cancelled - the password was not typed correctly.")
         return
 
     vector = features.from_capture(recorder, extended=profile.extended)
