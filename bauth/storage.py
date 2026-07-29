@@ -21,11 +21,17 @@ actually fit on.
 import os
 import pickle
 import time
+import warnings
 from dataclasses import dataclass, field
 
 import numpy as np
 
 from . import config, features
+
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+except ImportError:  # older scikit-learn
+    InconsistentVersionWarning = None
 
 
 def _path(user_id, *parts):
@@ -33,13 +39,32 @@ def _path(user_id, *parts):
 
 
 def _read_pickle(path, default=None):
+    """Load a pickle, or return ``default`` if it is missing or unreadable.
+
+    A model pickled by a different scikit-learn version emits one
+    InconsistentVersionWarning per estimator -- seven lines every time a
+    profile is opened, which buries the program's own output. The mismatch is
+    already handled: profiles record their schema version, and a stale model is
+    replaced on the next retrain. So the warning is suppressed here and
+    reported once, per profile, through ``sklearn_version_mismatch``.
+    """
+    global _saw_version_mismatch
     if not os.path.exists(path):
         return default
     try:
-        with open(path, "rb") as handle:
-            return pickle.load(handle)
+        with open(path, "rb") as handle, warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            value = pickle.load(handle)
+        if InconsistentVersionWarning is not None and any(
+            issubclass(w.category, InconsistentVersionWarning) for w in caught
+        ):
+            _saw_version_mismatch = True
+        return value
     except (pickle.UnpicklingError, EOFError, AttributeError, ImportError):
         return default
+
+
+_saw_version_mismatch = False
 
 
 def _write_pickle(path, value):
@@ -79,6 +104,10 @@ class Profile:
     anchor_centroid: np.ndarray = None
     anchor_spread: np.ndarray = None
     anchor_time: float = 0.0
+
+    # True when the stored model was pickled by a different scikit-learn
+    # version. Set on load; not persisted.
+    sklearn_version_mismatch: bool = False
 
     # -- derived -------------------------------------------------------------
     @property
@@ -190,6 +219,9 @@ def load(user_id):
     if not exists(user_id):
         return None
 
+    global _saw_version_mismatch
+    _saw_version_mismatch = False
+
     metadata = _read_pickle(_path(user_id, "metadata.pkl"))
     if not metadata or "password" not in metadata:
         return None
@@ -228,6 +260,8 @@ def load(user_id):
 
     if profile.model is None or profile.scaler is None:
         return None
+
+    profile.sklearn_version_mismatch = _saw_version_mismatch
     return profile
 
 
