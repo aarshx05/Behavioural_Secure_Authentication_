@@ -29,7 +29,7 @@ This project uses various machine learning models—SVM, KNN, and Random Forest�
 12. [Future Enhancements](#future-enhancements)
 13. [Demo](#demo)
 14. [Reproducing the Demo](#reproducing-the-demo)
-15. [Evaluation Status](#evaluation-status)
+15. [Evaluation](#evaluation)
 
 ---
 
@@ -286,7 +286,7 @@ Only `hold` and `dd` existed previously; release timestamps were captured and di
 
 It is tempting to append the IP to the feature array. That fails for three reasons:
 
-- Context is **constant during enrollment**, so the classifier would learn "local IP is 192.168.1.7 ⇒ authentic". That is trivially spoofable, and it collapses the moment the user switches to Wi-Fi, a VPN, or a new DHCP lease.
+- Context is **constant during enrollment**, so the classifier would learn "local IP is 192.168.1.7 => authentic". That is trivially spoofable, and it collapses the moment the user switches to Wi-Fi, a VPN, or a new DHCP lease.
 - Context is **categorical**. Standard-scaling an encoded IP is meaningless, and the synthetic negative generator perturbs *timings* — adding Gaussian noise to an encoded hostname produces nothing an impostor would ever look like.
 - A user's network legitimately changes **far more often** than their typing rhythm, so context belongs on a slower, separate axis.
 
@@ -333,7 +333,7 @@ Negatives are regenerated from scratch on every retrain at a fixed ratio to the 
 The system adjusts the acceptance threshold from the user's own score history, so users who type slightly differently on different occasions are not falsely rejected.
 
 - **Initial Threshold**: A static threshold (default: 0.4) is used until 5 scores have been recorded.
-- **Dynamic Adjustment**: The threshold is placed at the **lower edge** of the user's genuine score distribution — `mean − k × std` of recent successful attempts — and clamped to a sane range. `k` is widened while the history is short, so a handful of unusually consistent logins cannot set a bar the user then struggles to clear.
+- **Dynamic Adjustment**: The threshold is placed at the **lower edge** of the user's genuine score distribution — `mean - k × std` of recent successful attempts — and clamped to a sane range. `k` is widened while the history is short, so a handful of unusually consistent logins cannot set a bar the user then struggles to clear.
 
 > **Note on an earlier bug.** Previous versions computed `mean + std`. Because only scores *above* the threshold are ever recorded, that mean is high by construction, and adding a standard deviation pushed the bar above almost every future genuine attempt. The threshold ratcheted upward on each success until the real user was locked out. The bar belongs below the genuine mean, not above it.
 
@@ -384,7 +384,7 @@ All user-related data is stored locally in the `user_data/<user_id>/` folder:
 
 | File | Contents |
 |---|---|
-| `metadata.pkl` | Schema version, password, feature spec, counters, template anchor |
+| `metadata.pkl` | Schema version, **salted password hash**, feature spec, counters, template anchor |
 | `model.pkl` | Trained voting classifier |
 | `scaler.pkl` | Fitted scaler for normalizing keystroke data |
 | `authentic_data.npy` | Authentic keystroke samples, oldest row first |
@@ -394,6 +394,16 @@ All user-related data is stored locally in the `user_data/<user_id>/` folder:
 | `match_probabilities.pkl` | Recent genuine match scores |
 | `recent_failures.pkl` | Rejected attempts that had the correct password (reporting only) |
 | `history.pkl` | Enrollment / retrain / drift event log |
+
+### Password storage
+
+Passwords are stored as a **salted hash**, never in recoverable form. scrypt is used where available (N=16384, r=8, p=1 — roughly 16 MB of memory per hash, which makes bulk offline guessing expensive rather than merely slow), with PBKDF2-HMAC-SHA256 at 480,000 rounds as the fallback. Each hash gets its own 16-byte random salt, and verification uses a constant-time comparison so timing cannot reveal how much of a guess was correct.
+
+The record is self-describing, so the parameters can be strengthened later without invalidating existing profiles.
+
+The password **length** is stored alongside the hash. That is not a leak — the feature vector is `4n + 12` long, so anyone holding a profile can already read the length straight off the stored samples — and the feature layout code needs it.
+
+> **Migration.** Profiles written before hashing existed keep their plaintext until someone supplies the password, because the hash cannot be derived without it. The next successful login upgrades the profile in place and logs a `password_hashed` event. The bundled `user_data/1` demo profile has already been migrated, so no plaintext credential is committed to this repository.
 
 ### Backwards compatibility
 
@@ -413,15 +423,21 @@ Public IP lookup is the one exception: it contacts a third-party service, so it 
 
 The system is functional, but there are several areas for improvement:
 
-1. **Hash the stored password**: `metadata.pkl` still holds the password in plaintext, which is a significant weakness in an authentication project. It should be salted and hashed.
+1. **Close the gap to the baseline.** The benchmark says a scaled Manhattan distance beats this project's ensemble (0.0905 vs 0.1331 EER). Either the ensemble earns its complexity or the distance metric should be the default detector, with the ensemble kept as an option. This is the most useful thing to work on next.
 
-2. **Advanced User Feedback**: Real-time feedback on typing patterns, and suggestions to help users adjust their typing for better recognition.
+2. **Drop or re-earn the redundant features.** UD, UU and the aggregates are exact functions of hold and DD, and measurably hurt. Either remove them or find a learner that benefits from the explicit encoding.
 
-4. **Real impostor data**: Negatives are currently synthetic. Evaluating against genuine impostor attempts — other people typing the same password — would give trustworthy FAR/FRR figures.
+3. **Fit the constants.** ~30 hand-set values in `bauth/config.py` — negative ratio, drift thresholds, adoption bars, risk weights — were tuned against simulated typists. The harness now exists to fit them on real data.
 
-5. **Feature selection**: A long password produces a high-dimensional vector from few samples. Dimensionality reduction or per-feature stability weighting may help.
+4. **Longitudinal evaluation.** Adaptive retraining and the drift logic are the most novel parts and are entirely unmeasured. Needs a dataset with sessions spread over time (Clarkson II).
 
-6. **Free-text keystroke dynamics**: Continuous authentication during a session, rather than only at the login prompt.
+5. **Adversarial evaluation of the poisoning bound.** `MAX_TEMPLATE_DRIFT` is asserted, not measured. It needs an adaptive attacker who deliberately walks the template.
+
+6. **Trained impostors.** CMU impostors are zero-effort. Attempts by someone who has watched the genuine user type would be far more informative.
+
+7. **Advanced user feedback**: real-time feedback on typing patterns to help users adjust for better recognition.
+
+8. **Free-text keystroke dynamics**: continuous authentication during a session, rather than only at the login prompt.
 
 ---
 
@@ -445,7 +461,7 @@ The password is typed ten times. Each accepted sample advances the bar; a mistyp
 
 ![Registration result showing 10 samples, 52 features per sample, 80 synthetic negatives, Easy preset, starting threshold 0.4](docs/images/03-registered.png)
 
-The 10-character password yields **52 features** per sample (`4n + 12`) and **80 synthetic negatives** at the 8:1 ratio. Note the imbalance this implies — 52 dimensions learned from 10 genuine samples. See [Evaluation status](#evaluation-status).
+The 10-character password yields **52 features** per sample (`4n + 12`) and **80 synthetic negatives** at the 8:1 ratio. Note the imbalance this implies — 52 dimensions learned from 10 genuine samples. See [Evaluation](#evaluation).
 
 ### 4. Genuine verification
 
@@ -530,22 +546,100 @@ Typing *inconsistently* instead — a different rhythm each attempt — produces
 
 ---
 
-## Evaluation status
+## Evaluation
 
-**The numbers in this README come from synthetic impostors, not real ones.** They should be read as demonstrations that the system works end to end, not as security claims.
+Measured on the **CMU keystroke dynamics benchmark** (Killourhy & Maxion, DSN 2009): 51 subjects typing `.tie5Roanl` 400 times each across 8 sessions, 20,400 samples.
 
-The classifier is trained on negatives generated from the user's own samples. Any measured separation therefore describes how well it distinguishes real typing from *that generator*, which is not the same question as how well it resists a human attacker. The 96.8% / 1.7% split above is a real measurement of a real typing difference, but it is one person, one password, one session.
+```bash
+python run_eval.py --download    # fetch the dataset (~4.7 MB, not redistributed here)
+python run_eval.py               # full run, all 51 subjects, ~3 minutes
+```
 
-Not yet done, in rough order of importance:
+### Protocol
 
-- **No FAR / FRR / EER or ROC/DET curves.** These are the standard metrics for the field and none are reported.
-- **No real impostor data.** Other people typing the same password is what a test set has to be.
-- **No public benchmark.** The CMU keystroke dynamics dataset (Killourhy & Maxion, DSN 2009 — 51 subjects × 400 repetitions) is the usual reference point, and GREYC and Clarkson II exist for cross-dataset and longitudinal work.
-- **No baselines.** Killourhy & Maxion found scaled Manhattan distance reached roughly 0.096 EER, beating several ML classifiers. An ensemble that cannot beat a distance metric would be worth knowing about.
-- **No held-out evaluation.** Training uses the whole window; there is no cross-validation.
-- **Roughly 30 hand-set constants** in `bauth/config.py` — negative ratio, drift thresholds, adoption bars, risk weights — tuned against simulated typists rather than fitted to data.
+Exactly the one used in the paper. For each subject in turn, treated as the genuine user:
 
-The adaptive retraining and template-drift bound are the parts most worth studying properly, since template aging is an open problem and the poisoning bound is currently asserted rather than measured against an adaptive adversary.
+- **train** on their first 200 repetitions (sessions 1–4)
+- **genuine test** on their remaining 200 (sessions 5–8)
+- **impostor test** on the first 5 repetitions of each of the other 50 subjects (250 samples)
+
+EER is computed per subject; the table reports the mean and the spread across subjects. Because the split is by session, genuine test scores come from sessions the model never saw — so the numbers include whatever drift occurred between sessions.
+
+### Harness validation
+
+Before trusting any new number, the harness has to reproduce known ones. It does:
+
+| Detector | This harness | Published | Δ |
+|---|---|---|---|
+| Manhattan (scaled) | 0.0962 | 0.096 | +0.0002 |
+| Nearest neighbour (Mahalanobis) | 0.0996 | 0.100 | -0.0004 |
+| Manhattan | 0.1529 | 0.153 | -0.0001 |
+| Euclidean | 0.1706 | 0.171 | -0.0004 |
+
+All four within 0.0004 of the published means, which is the evidence that the protocol, the EER computation and the feature extraction match the reference.
+
+The loader is separately checked against the dataset's own redundancy: `UD = DD - H` must hold for every transition, and does, to 8.9 × 10^-16.
+
+### Results
+
+| System | EER | sd | median | AUC | 0-miss FAR |
+|---|---|---|---|---|---|
+| **Manhattan (scaled), raw21** | **0.0905** | 0.0708 | 0.0750 | 0.9596 | 0.4841 |
+| Manhattan (scaled), raw31 | 0.0962 | 0.0694 | 0.0800 | 0.9538 | 0.5525 |
+| Mahalanobis NN, raw31 | 0.0996 | 0.0642 | 0.0850 | 0.9538 | 0.7056 |
+| **This project (Harsh), raw21** | **0.1331** | 0.0885 | 0.1100 | 0.9251 | 0.5915 |
+| This project (Harsh), raw31 | 0.1482 | 0.0943 | 0.1350 | 0.9164 | 0.6554 |
+| Manhattan, raw31 | 0.1529 | 0.0925 | 0.1320 | 0.9026 | 0.6040 |
+| This project (Harsh), extended56 | 0.1643 | 0.1023 | 0.1520 | 0.9059 | 0.6798 |
+| Euclidean, raw31 | 0.1706 | 0.0952 | 0.1550 | 0.8793 | 0.7360 |
+| This project (Easy), extended56 | 0.1754 | 0.1013 | 0.1640 | 0.8968 | 0.6807 |
+
+Lower EER is better. *0-miss FAR* is the impostor accept rate at the threshold that rejects no genuine sample.
+
+### What this shows
+
+**1. The ensemble loses to a distance metric.** Scaled Manhattan reaches 0.0905; the best configuration of this project's voting ensemble reaches 0.1331 — about 47% worse. A classifier trained against manufactured negatives does not beat an anomaly detector that never sees a negative at all. On this benchmark the extra machinery is not earning its place.
+
+**2. The extended feature set actively hurts.** Same classifier, same protocol, three representations:
+
+| Features | Columns | EER |
+|---|---|---|
+| raw21 (hold + DD) | 21 | 0.1331 |
+| raw31 (published) | 31 | 0.1482 |
+| extended56 (this project) | 56 | 0.1643 |
+
+Monotonic, and it holds for the baseline too — scaled Manhattan improves from 0.0962 to 0.0905 when the redundant columns are dropped.
+
+**3. Why: UD and UU carry no information.** A keystroke sequence has `2n - 1` degrees of freedom relative to the first press — `n` hold times and `n - 1` down-down latencies. Everything else is an exact linear function of those:
+
+```
+UD[i] = DD[i] - H[i]
+UU[i] = DD[i] + H[i+1] - H[i]
+```
+
+So the up-down and up-up features added in the previous release are **redundant re-encodings, not new signal**. An earlier version of this README claimed they were "genuinely new information". That was wrong, and the measurement above is what corrects it. The aggregate features are deterministic functions of the same timings and are redundant in the same way; the published 31-column set carries 10 redundant columns, and the 56-column set carries 35.
+
+Redundancy is not automatically harmful — making structure explicit can help a tree-based learner. Here it measurably did not: it cost dimensions without adding information, and every learner in the ensemble did worse for it.
+
+**4. A small result worth keeping.** Dropping the redundant columns improves the paper's best detector from 0.0962 to **0.0905**, using nothing but the non-redundant parameterisation.
+
+### What this does not show
+
+The benchmark measures **one thing**: distinguishing a genuine user from zero-effort impostors on a fixed 10-character password, within one dataset. It says nothing about the parts of this project that are not classifier accuracy:
+
+- **Adaptive retraining and drift handling** need longitudinal data. CMU spans 8 sessions but published work uses it as a static benchmark; Clarkson II is the usual choice for template aging.
+- **The template-poisoning bound** is still asserted rather than measured — it needs an adaptive adversary, not a static test set.
+- **Contextual risk scoring** has no benchmark here at all; CMU carries no network or device metadata.
+- **Trained impostors.** CMU impostors are zero-effort — subjects typing a password that is not theirs, without practice. Against someone who has watched the genuine user type, all these numbers would be worse.
+
+Roughly 30 constants in `bauth/config.py` remain hand-set rather than fitted. The evaluation harness now exists to tune them against data instead of intuition, which has not been done.
+
+### Reproducibility
+
+- **`RANDOM_SEED` in `bauth/config.py`** (currently `20260726`) drives synthetic negative generation, the SVM's probability-calibration folds, and the random forest. Same samples plus same seed gives a bit-identical model — there is a determinism check in the test suite.
+- **`requirements.txt` pins exact versions.** scikit-learn changes estimator internals between minor releases, so an unpinned install can shift SVM and forest behaviour between the run that produced a number and the run that reproduces it.
+- **Two deliberate sources of non-determinism.** Recency weighting depends on wall-clock sample age, so `models.train()` and `adaptive.fit_profile()` take a `now` argument — pass a fixed timestamp in experiments. Context capture reads the live clock and network. The evaluation harness passes `timestamps=None`, disabling recency weighting entirely, so its results do not depend on when it was run.
+- Results above were produced on CPython 3.14.6, numpy 2.5.1, scikit-learn 1.9.0. Full per-subject output is in [`docs/cmu-results.json`](docs/cmu-results.json).
 
 ---
 
