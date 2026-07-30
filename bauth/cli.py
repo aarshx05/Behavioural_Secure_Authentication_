@@ -82,7 +82,7 @@ def retrain_user():
         return
 
     password = input("Enter password: ")
-    if password != profile.password:
+    if not profile.check_password(password):
         print("\nPassword mismatch! Cannot retrain model.")
         return
 
@@ -136,7 +136,7 @@ def verify_user():
         return
 
     password = input("Enter password: ")
-    if password != profile.password:
+    if not profile.check_password(password):
         print("\nWrong initial password.")
         return
 

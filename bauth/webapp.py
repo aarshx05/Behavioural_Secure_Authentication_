@@ -134,7 +134,7 @@ def api_users():
                 "user_id": user_id,
                 "samples": profile.sample_count,
                 "legacy": profile.is_legacy,
-                "password_length": len(profile.password),
+                "password_length": profile.password_length,
             }
         )
     return jsonify({"users": users})
@@ -188,7 +188,7 @@ def api_verify():
     profile = storage.load(user_id)
     if profile is None:
         return jsonify({"ok": False, "error": f"User '{user_id}' does not exist."}), 404
-    if password != profile.password:
+    if not profile.check_password(password):
         return jsonify({"ok": False, "authenticated": False, "reason": "wrong_password",
                         "error": "Wrong password."}), 200
 
@@ -247,7 +247,7 @@ def api_retrain():
     profile = storage.load(user_id)
     if profile is None:
         return jsonify({"ok": False, "error": f"User '{user_id}' does not exist."}), 404
-    if password != profile.password:
+    if not profile.check_password(password):
         return jsonify({"ok": False, "error": "Password mismatch - cannot retrain."}), 403
 
     if profile.is_legacy:

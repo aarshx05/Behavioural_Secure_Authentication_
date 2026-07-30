@@ -316,11 +316,11 @@ def enroll(user_id, password, samples, choice_train=1):
     """Build a fresh profile from enrollment samples."""
     profile = storage.Profile(
         user_id=str(user_id),
-        password=password,
         schema_version=config.SCHEMA_VERSION,
         extended=config.EXTENDED_FEATURES,
         model_choice=models.normalize_choice(choice_train),
     )
+    profile.set_password(password)
     for vector, context in samples:
         profile.add_sample(vector, context=context, source="enroll")
 
