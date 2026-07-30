@@ -4,6 +4,19 @@ Everything the system's behaviour depends on lives here so it can be tuned
 without hunting through the code.
 """
 
+# --- Reproducibility ---------------------------------------------------------
+# One seed drives every stochastic step: synthetic negative generation, the
+# SVM's probability calibration folds, and the random forest. Given the same
+# samples and the same seed, training is bit-for-bit repeatable, which is what
+# lets an experiment be re-run and checked.
+#
+# Two sources of non-determinism remain by design and must be pinned explicitly
+# when running experiments:
+#   * recency weighting depends on wall-clock age, so models.train() and
+#     adaptive.fit_profile() take a `now` argument -- pass a fixed timestamp;
+#   * context capture reads the live clock and network.
+RANDOM_SEED = 20260726
+
 # --- Storage -----------------------------------------------------------------
 USER_DATA_PATH = "user_data"
 

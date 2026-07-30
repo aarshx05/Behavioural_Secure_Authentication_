@@ -1,8 +1,9 @@
-"""Model training, recency weighting, and synthetic negative generation."""
+﻿"""Model training, recency weighting, and synthetic negative generation."""
 
 import numpy as np
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.model_selection import StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
@@ -35,6 +36,15 @@ def normalize_choice(choice, default=HARSH):
     return value if value in (HARSH, EASY) else default
 
 
+def _calibration_folds():
+    """Deterministic stratified folds for the SVM's probability calibration.
+
+    Left to its default, CalibratedClassifierCV builds folds that depend on row
+    order; pinning the splitter makes calibration reproducible.
+    """
+    return StratifiedKFold(n_splits=3, shuffle=True, random_state=config.RANDOM_SEED)
+
+
 def _calibrated_svm(**kwargs):
     """RBF SVM exposing predict_proba, without SVC(probability=True).
 
@@ -45,9 +55,14 @@ def _calibrated_svm(**kwargs):
     forward-compatible.
     """
     return CalibratedClassifierCV(
-        SVC(kernel="rbf", class_weight="balanced", **kwargs),
+        SVC(
+            kernel="rbf",
+            class_weight="balanced",
+            random_state=config.RANDOM_SEED,
+            **kwargs,
+        ),
         method="sigmoid",
-        cv=3,
+        cv=_calibration_folds(),
         ensemble=False,
     )
 
@@ -72,7 +87,7 @@ def build_estimators(choice_train=HARSH, n_samples=None):
         svm = _calibrated_svm(C=5.0, gamma="scale")
         neighbors = 3
         forest = RandomForestClassifier(
-            n_estimators=100, random_state=42, class_weight="balanced"
+            n_estimators=100, random_state=config.RANDOM_SEED, class_weight="balanced"
         )
     else:
         svm = _calibrated_svm(C=1.0, gamma="scale")
@@ -81,7 +96,7 @@ def build_estimators(choice_train=HARSH, n_samples=None):
             n_estimators=100,
             max_depth=10,
             min_samples_split=2,
-            random_state=42,
+            random_state=config.RANDOM_SEED,
             class_weight="balanced",
         )
 
@@ -149,7 +164,7 @@ def generate_negatives(authentic, n_chars, extended=True, rng=None, count=None):
                  rather than just how fast the password gets typed
     ``random``   broad draws across a plausible human range
     """
-    rng = rng or np.random.default_rng(42)
+    rng = rng or np.random.default_rng(config.RANDOM_SEED)
     authentic = np.atleast_2d(np.asarray(authentic, dtype=float))
 
     decomposed = [features.decompose(row, n_chars, extended) for row in authentic]

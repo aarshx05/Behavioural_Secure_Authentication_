@@ -1,4 +1,27 @@
-numpy>=1.21
-scikit-learn>=1.0
-pynput>=1.7
-flask>=2.2
+# Exact pins, not ranges.
+#
+# scikit-learn changes estimator internals between minor versions -- default
+# solvers, tie-breaking, calibration behaviour -- so an unpinned install can
+# silently shift SVM and random-forest output between the run that produced a
+# result and the run that reproduces it. Pinning is what makes the seeds in
+# bauth/config.py (RANDOM_SEED) actually worth having.
+#
+# Verified on CPython 3.14.6 (Windows 11, AMD64).
+# Regenerate with:  pip freeze > requirements.lock.txt
+
+numpy==2.5.1
+scikit-learn==1.9.0
+scipy==1.18.0
+joblib==1.5.3
+threadpoolctl==3.6.0
+
+pynput==1.8.2
+six==1.17.0
+
+Flask==3.1.3
+Werkzeug==3.1.8
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+itsdangerous==2.2.0
+click==8.4.2
+blinker==1.9.0
