@@ -1,3 +1,7 @@
+# Benchmark data is fetched, not vendored: it belongs to its publishers and
+# would add megabytes of binary churn. Get it with `python run_eval.py --download`.
+data/
+
 __pycache__/
 *.py[cod]
 .venv/

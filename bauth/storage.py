@@ -18,6 +18,7 @@ legacy 2n feature layout, so they keep verifying against the model they were
 actually fit on.
 """
 
+import hmac
 import os
 import pickle
 import time
@@ -26,7 +27,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from . import config, features
+from . import config, features, passwords
 
 try:
     from sklearn.exceptions import InconsistentVersionWarning
@@ -74,8 +75,20 @@ def _write_pickle(path, value):
 
 @dataclass
 class Profile:
+    """A user's stored biometric template and credentials.
+
+    There is deliberately no ``password`` attribute. An earlier revision kept
+    one as a dataclass ``InitVar`` for constructor convenience, but that leaves
+    a class-level ``None`` behind, so ``profile.password`` would silently
+    return None rather than raise -- and code like ``if pw != profile.password``
+    would keep running while comparing against nothing. Constructing with
+    ``Profile(user_id, ...)`` and calling :meth:`set_password` makes any stale
+    read fail loudly instead.
+    """
+
     user_id: str
-    password: str
+    password_hash: dict = None
+    password_length: int = 0
     schema_version: int = config.SCHEMA_VERSION
     extended: bool = config.EXTENDED_FEATURES
     model_choice: int = 1
@@ -109,10 +122,44 @@ class Profile:
     # version. Set on load; not persisted.
     sklearn_version_mismatch: bool = False
 
+    # Plaintext read from a pre-hashing profile. Held only until the next
+    # successful password check, which upgrades the profile in place.
+    legacy_plaintext: str = None
+
+    # -- credentials ---------------------------------------------------------
+    def set_password(self, password):
+        self.password_hash = passwords.hash_password(password)
+        self.password_length = len(password)
+        self.legacy_plaintext = None
+
+    def check_password(self, candidate):
+        """Verify a password, upgrading a legacy plaintext profile on success.
+
+        Migration happens on use rather than on load: a profile written before
+        hashing existed cannot be upgraded until someone supplies the password,
+        because the hash cannot be derived from the stored value alone without
+        keeping it. The caller persists the profile as it normally would.
+        """
+        if self.password_hash:
+            return passwords.verify_password(candidate, self.password_hash)
+
+        if self.legacy_plaintext is not None:
+            if not hmac.compare_digest(candidate, self.legacy_plaintext):
+                return False
+            self.set_password(candidate)
+            self.log("password_hashed", scheme=passwords.describe(self.password_hash))
+            return True
+
+        return False
+
+    @property
+    def password_is_plaintext(self):
+        return self.password_hash is None and self.legacy_plaintext is not None
+
     # -- derived -------------------------------------------------------------
     @property
     def char_count(self):
-        return len(self.password)
+        return self.password_length
 
     @property
     def feature_dim(self):
@@ -223,8 +270,20 @@ def load(user_id):
     _saw_version_mismatch = False
 
     metadata = _read_pickle(_path(user_id, "metadata.pkl"))
-    if not metadata or "password" not in metadata:
+    if not metadata:
         return None
+
+    # Two credential formats exist: a hashed record, and the plaintext written
+    # by versions before hashing. A plaintext profile is loaded as such and
+    # upgraded by the next successful check_password.
+    password_hash = metadata.get("password_hash")
+    legacy_plaintext = None if password_hash else metadata.get("password")
+    if password_hash is None and legacy_plaintext is None:
+        return None
+
+    password_length = metadata.get(
+        "password_length", len(legacy_plaintext or "")
+    )
 
     version = metadata.get("schema_version", config.LEGACY_SCHEMA_VERSION)
     # v1 profiles predate the extended feature set; their model was fit on the
@@ -236,7 +295,9 @@ def load(user_id):
 
     profile = Profile(
         user_id=user_id,
-        password=metadata["password"],
+        password_hash=password_hash,
+        password_length=password_length,
+        legacy_plaintext=legacy_plaintext,
         schema_version=version,
         extended=bool(extended),
         model_choice=metadata.get("model_choice", 1),
@@ -279,7 +340,14 @@ def save(profile):
         _path(profile.user_id, "metadata.pkl"),
         {
             "schema_version": profile.schema_version,
-            "password": profile.password,
+            # Written only as a salted hash. A profile that has not yet been
+            # migrated keeps its plaintext until someone supplies the password,
+            # since the hash cannot be derived without it.
+            "password_hash": profile.password_hash,
+            "password_length": profile.password_length,
+            **({"password": profile.legacy_plaintext}
+               if profile.password_hash is None and profile.legacy_plaintext is not None
+               else {}),
             "extended": profile.extended,
             "char_count": profile.char_count,
             "feature_dim": profile.feature_dim,
