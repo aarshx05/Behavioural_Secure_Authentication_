@@ -38,6 +38,44 @@ AGGREGATE_NAMES = [
 
 N_AGGREGATES = len(AGGREGATE_NAMES)
 
+FEATURE_SETS = {
+    # Stable raw timings shared by the anomaly-style detectors.
+    "core": ("hold", "dd"),
+    # Adds true flight time, which captures overlap and key transitions.
+    "transition": ("hold", "dd", "ud"),
+    # Richer rhythm signal for discriminative models.
+    "extended": (
+        "hold",
+        "dd",
+        "ud",
+        "mean_hold",
+        "std_hold",
+        "mean_dd",
+        "std_dd",
+        "mean_ud",
+        "std_ud",
+        "typing_speed",
+        "overlap_ratio",
+    ),
+    # Forests benefit more from coarser timing summaries than from every column.
+    "aggregate": (
+        "hold",
+        "dd",
+        "mean_hold",
+        "std_hold",
+        "min_hold",
+        "max_hold",
+        "mean_dd",
+        "std_dd",
+        "mean_ud",
+        "std_ud",
+        "mean_uu",
+        "std_uu",
+        "typing_speed",
+        "overlap_ratio",
+    ),
+}
+
 
 def feature_dim(n_chars, extended=True):
     """Length of the feature vector for an ``n_chars``-long password."""
@@ -166,3 +204,38 @@ def describe(n_chars, extended=True):
         names += [f"uu[{i}->{i + 1}]" for i in range(n_chars - 1)]
         names += list(AGGREGATE_NAMES)
     return names
+
+
+def feature_indices(n_chars, extended=True):
+    """Map every feature name returned by :func:`describe` to its column index."""
+    return {name: idx for idx, name in enumerate(describe(n_chars, extended))}
+
+
+def select_set(X, n_chars, extended=True, set_name="extended"):
+    """Project ``X`` onto one of the named feature configurations."""
+    matrix = np.atleast_2d(np.asarray(X, dtype=float))
+    names = describe(n_chars, extended)
+    index = feature_indices(n_chars, extended)
+    selected = []
+
+    for token in FEATURE_SETS[set_name]:
+        if token in AGGREGATE_NAMES:
+            selected.append(index[token])
+            continue
+        if token == "hold":
+            selected.extend(index[f"hold[{i}]"] for i in range(n_chars))
+            continue
+        if token == "dd":
+            selected.extend(index[f"dd[{i}->{i + 1}]"] for i in range(n_chars - 1))
+            continue
+        if token == "ud" and extended:
+            selected.extend(index[f"ud[{i}->{i + 1}]"] for i in range(n_chars - 1))
+            continue
+        if token == "uu" and extended:
+            selected.extend(index[f"uu[{i}->{i + 1}]"] for i in range(n_chars - 1))
+            continue
+        raise KeyError(f"unknown feature token: {token!r}")
+
+    if not selected:
+        raise ValueError(f"feature set {set_name!r} produced no columns from {names!r}")
+    return matrix[:, selected]

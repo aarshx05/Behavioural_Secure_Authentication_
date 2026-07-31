@@ -1,17 +1,27 @@
-﻿"""Model training, recency weighting, and synthetic negative generation."""
+"""Detector training, calibration, fusion, and synthetic negative generation."""
+
+from copy import deepcopy
+from dataclasses import dataclass, field
 
 import numpy as np
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-from . import config, features
+from . import attacks, config, features
 
 HARSH = 1
 EASY = 2
+
+DETECTOR_FEATURES = {
+    "anchor": "transition",
+    "knn": "transition",
+    "svm": "extended",
+    "rf": "aggregate",
+}
 
 # Floors keep a perfectly consistent typist from producing a zero-width
 # distribution that every perturbation would then fall outside of.
@@ -22,13 +32,7 @@ _STD_FLOOR = 0.008
 
 
 def normalize_choice(choice, default=HARSH):
-    """Coerce a model choice to an int.
-
-    The CLI reads this with input(), so it arrives as a string. The original
-    code compared that string against the integer 1, which was never true --
-    meaning the 'Harsh' preset was unreachable and every model ever trained
-    silently used the 'Easy' one.
-    """
+    """Coerce a model choice to an int."""
     try:
         value = int(str(choice).strip())
     except (TypeError, ValueError):
@@ -36,61 +40,229 @@ def normalize_choice(choice, default=HARSH):
     return value if value in (HARSH, EASY) else default
 
 
-def _calibration_folds():
-    """Deterministic stratified folds for the SVM's probability calibration.
-
-    Left to its default, CalibratedClassifierCV builds folds that depend on row
-    order; pinning the splitter makes calibration reproducible.
-    """
-    return StratifiedKFold(n_splits=3, shuffle=True, random_state=config.RANDOM_SEED)
-
-
-def _calibrated_svm(**kwargs):
-    """RBF SVM exposing predict_proba, without SVC(probability=True).
-
-    Soft voting needs probabilities, but SVC's own ``probability=True`` is
-    deprecated as of scikit-learn 1.9 and removed in 1.11. Wrapping in
-    CalibratedClassifierCV is the supported replacement and measured slightly
-    more stable here (higher worst-case genuine score) on top of being
-    forward-compatible.
-    """
-    return CalibratedClassifierCV(
-        SVC(
-            kernel="rbf",
-            class_weight="balanced",
-            random_state=config.RANDOM_SEED,
-            **kwargs,
-        ),
-        method="sigmoid",
-        cv=_calibration_folds(),
-        ensemble=False,
+def _calibration_folds(y):
+    """Deterministic stratified folds for per-detector calibration."""
+    min_class = int(np.min(np.bincount(np.asarray(y, dtype=int))))
+    folds = max(2, min(3, min_class))
+    return StratifiedKFold(
+        n_splits=folds, shuffle=True, random_state=config.RANDOM_SEED
     )
 
 
-def build_estimators(choice_train=HARSH, n_samples=None):
-    """Build the three base estimators for a preset.
+@dataclass
+class IdentityScaler:
+    """Compatibility shim for callers that still expect ``scaler.transform``."""
 
-    Both presets use an RBF kernel. The original 'Harsh' preset used
-    ``kernel='linear'``, which cannot work here: the synthetic negatives
-    surround the authentic cluster in every direction, and no hyperplane
-    separates a blob from a shell enclosing it. Measured on simulated typists,
-    the linear kernel scored genuine samples at ~0.53 against RBF's ~0.73,
-    dragging the whole ensemble down. That preset was unreachable in practice
-    because of the string/int comparison bug in normalize_choice, so the flaw
-    never surfaced.
+    def transform(self, X):
+        return np.asarray(X, dtype=float)
 
-    The presets now differ in strictness rather than in kernel.
-    """
+
+@dataclass
+class RobustScaler:
+    """Feature-wise normalization with optional winsorization and clipping."""
+
+    mode: str = config.DEFAULT_SCALER
+    clip: float = config.SCALER_CLIP
+    winsor_limit: float = config.WINSOR_LIMIT
+    center_: np.ndarray = None
+    scale_: np.ndarray = None
+    lower_: np.ndarray = None
+    upper_: np.ndarray = None
+
+    def fit(self, X):
+        X = np.asarray(X, dtype=float)
+        base = X
+
+        if self.mode == "winsorized_mad":
+            lower = np.quantile(X, self.winsor_limit, axis=0)
+            upper = np.quantile(X, 1.0 - self.winsor_limit, axis=0)
+            self.lower_ = lower
+            self.upper_ = upper
+            base = np.clip(X, lower, upper)
+
+        if self.mode == "standard":
+            center = base.mean(axis=0)
+            scale = base.std(axis=0)
+        elif self.mode in ("mad", "winsorized_mad"):
+            center = np.median(base, axis=0)
+            scale = np.median(np.abs(base - center), axis=0)
+        else:
+            raise ValueError(f"unknown scaler mode: {self.mode!r}")
+
+        self.center_ = np.asarray(center, dtype=float)
+        self.scale_ = np.maximum(np.asarray(scale, dtype=float), _STD_FLOOR)
+        return self
+
+    def transform(self, X):
+        X = np.asarray(X, dtype=float)
+        if self.lower_ is not None and self.upper_ is not None:
+            X = np.clip(X, self.lower_, self.upper_)
+        Z = (X - self.center_) / self.scale_
+        if self.clip is not None:
+            Z = np.clip(Z, -self.clip, self.clip)
+        return Z
+
+    def fit_transform(self, X):
+        return self.fit(X).transform(X)
+
+
+@dataclass
+class ScaledManhattanDetector:
+    """Robust scaled-Manhattan anchor detector."""
+
+    feature_set: str = DETECTOR_FEATURES["anchor"]
+    scale_floor: float = config.MANHATTAN_SCALE_FLOOR
+    scaler_mode: str = config.DEFAULT_SCALER
+    scaler: RobustScaler = None
+    median_: np.ndarray = None
+    mad_: np.ndarray = None
+    reliability_: np.ndarray = None
+    calibrator_: object = None
+
+    def fit(self, X_pos, X_neg, n_chars, extended):
+        X_pos = _project_features(X_pos, n_chars, extended, self.feature_set)
+        X_neg = _project_features(X_neg, n_chars, extended, self.feature_set)
+
+        self.scaler = RobustScaler(mode=self.scaler_mode)
+        pos_scaled = self.scaler.fit_transform(X_pos)
+        neg_scaled = self.scaler.transform(X_neg)
+
+        self.median_ = np.median(pos_scaled, axis=0)
+        mad = np.median(np.abs(pos_scaled - self.median_), axis=0)
+        self.mad_ = np.maximum(mad, self.scale_floor)
+
+        variability = np.maximum(self.mad_, 1e-6)
+        self.reliability_ = 1.0 / variability
+        self.reliability_ *= len(self.reliability_) / self.reliability_.sum()
+
+        pos_distance = self.distance_from_scaled(pos_scaled)
+        neg_distance = self.distance_from_scaled(neg_scaled)
+        raw = np.concatenate([-pos_distance, -neg_distance]).reshape(-1, 1)
+        y = np.concatenate(
+            [np.ones(len(pos_distance), dtype=int), np.zeros(len(neg_distance), dtype=int)]
+        )
+        self.calibrator_ = LogisticRegression(
+            random_state=config.RANDOM_SEED, max_iter=500
+        )
+        self.calibrator_.fit(raw, y)
+        return self
+
+    def distance_from_scaled(self, X_scaled):
+        delta = np.abs(np.asarray(X_scaled, dtype=float) - self.median_)
+        scaled = self.reliability_ * delta / np.maximum(self.mad_, self.scale_floor)
+        return scaled.mean(axis=1)
+
+    def analyse(self, X, n_chars, extended):
+        X_proj = _project_features(X, n_chars, extended, self.feature_set)
+        X_scaled = self.scaler.transform(X_proj)
+        distance = self.distance_from_scaled(X_scaled)
+        score = self.calibrator_.predict_proba((-distance).reshape(-1, 1))[:, 1]
+        return {"score": score, "distance": distance}
+
+
+@dataclass
+class CalibratedEstimator:
+    """One detector with its own feature view and robust normalization."""
+
+    name: str
+    estimator: object
+    feature_set: str
+    scaler_mode: str = config.DEFAULT_SCALER
+    scaler: RobustScaler = None
+    model: object = None
+
+    def fit(self, X_pos, X_neg, n_chars, extended):
+        X_pos = _project_features(X_pos, n_chars, extended, self.feature_set)
+        X_neg = _project_features(X_neg, n_chars, extended, self.feature_set)
+        X = np.vstack([X_pos, X_neg])
+        y = np.hstack([np.ones(len(X_pos)), np.zeros(len(X_neg))])
+
+        self.scaler = RobustScaler(mode=self.scaler_mode)
+        X_scaled = self.scaler.fit_transform(X)
+        self.model = CalibratedClassifierCV(
+            estimator=deepcopy(self.estimator),
+            method="sigmoid",
+            cv=_calibration_folds(y),
+            ensemble=False,
+        )
+        self.model.fit(X_scaled, y)
+        return self
+
+    def analyse(self, X, n_chars, extended):
+        X_proj = _project_features(X, n_chars, extended, self.feature_set)
+        X_scaled = self.scaler.transform(X_proj)
+        score = self.model.predict_proba(X_scaled)[:, 1]
+        return {"score": score}
+
+
+@dataclass
+class FusionModel:
+    """Self-contained multi-detector biometric scorer."""
+
+    n_chars: int
+    extended: bool
+    detectors: dict
+    weights: dict
+    self_contained: bool = True
+    detector_order: tuple = ("anchor", "svm", "knn", "rf")
+    thresholds: dict = field(default_factory=dict)
+
+    def analyse(self, X):
+        X = np.atleast_2d(np.asarray(X, dtype=float))
+        detector_scores = {}
+        anchor_distance = np.zeros(len(X))
+
+        for name in self.detector_order:
+            details = self.detectors[name].analyse(X, self.n_chars, self.extended)
+            detector_scores[name] = details["score"]
+            if name == "anchor":
+                anchor_distance = details["distance"]
+
+        score_matrix = np.column_stack(
+            [detector_scores[name] for name in self.detector_order]
+        )
+        weights = np.array([self.weights[name] for name in self.detector_order], dtype=float)
+        fused = np.sum(score_matrix * weights, axis=1)
+        disagreement = np.sqrt(
+            np.sum(weights * np.square(score_matrix - fused[:, None]), axis=1)
+        )
+        return {
+            "fused": fused,
+            "disagreement": disagreement,
+            "scores": detector_scores,
+            "anchor_distance": anchor_distance,
+        }
+
+    def predict_proba(self, X):
+        fused = self.analyse(X)["fused"]
+        return np.column_stack([1.0 - fused, fused])
+
+
+def _build_estimators(choice_train=HARSH, n_samples=None):
     choice = normalize_choice(choice_train)
 
     if choice == HARSH:
-        svm = _calibrated_svm(C=5.0, gamma="scale")
+        svm = SVC(
+            kernel="rbf",
+            C=5.0,
+            gamma="scale",
+            class_weight="balanced",
+            random_state=config.RANDOM_SEED,
+        )
         neighbors = 3
         forest = RandomForestClassifier(
-            n_estimators=100, random_state=config.RANDOM_SEED, class_weight="balanced"
+            n_estimators=100,
+            random_state=config.RANDOM_SEED,
+            class_weight="balanced",
         )
     else:
-        svm = _calibrated_svm(C=1.0, gamma="scale")
+        svm = SVC(
+            kernel="rbf",
+            C=1.0,
+            gamma="scale",
+            class_weight="balanced",
+            random_state=config.RANDOM_SEED,
+        )
         neighbors = 5
         forest = RandomForestClassifier(
             n_estimators=100,
@@ -100,23 +272,14 @@ def build_estimators(choice_train=HARSH, n_samples=None):
             class_weight="balanced",
         )
 
-    # KNN raises if it is asked for more neighbours than there are samples.
     if n_samples:
         neighbors = max(1, min(neighbors, n_samples))
     knn = KNeighborsClassifier(n_neighbors=neighbors, weights="distance")
-
     return svm, knn, forest
 
 
 def replicate_by_recency(X, timestamps, now=None, half_life_days=None, max_replication=None):
-    """Duplicate recent rows so newer typing dominates the fit.
-
-    Recency is expressed by replication rather than ``sample_weight`` because
-    VotingClassifier only forwards sample weights when *every* estimator accepts
-    them, and KNeighborsClassifier does not -- passing weights would raise.
-
-    Returns ``(X_replicated, counts)``.
-    """
+    """Duplicate recent rows so newer typing dominates the fit."""
     X = np.asarray(X, dtype=float)
     if timestamps is None or len(timestamps) != len(X):
         return X, np.ones(len(X), dtype=int)
@@ -144,126 +307,99 @@ def _column_std(matrix):
     return np.maximum(std, _STD_FLOOR)
 
 
-def generate_negatives(authentic, n_chars, extended=True, rng=None, count=None):
-    """Synthesise impostor samples from a user's authentic samples.
+def generate_negatives(authentic, n_chars, extended=True, rng=None, count=None, return_metadata=False):
+    """Synthesise impostor samples from a user's authentic samples."""
+    records = attacks.generate_negative_records(
+        authentic,
+        n_chars,
+        extended=extended,
+        rng=rng or np.random.default_rng(config.RANDOM_SEED),
+        count=count,
+    )
+    negatives = attacks.records_to_matrix(records)
+    if return_metadata:
+        return negatives, [record.metadata for record in records]
+    return negatives
 
-    The original generator added a fixed 0.1s Gaussian to the assembled vector.
-    That is a large perturbation next to a ~0.09s dwell time but a negligible
-    one next to total_time, and it left the aggregate features inconsistent with
-    the per-key values.
 
-    This builds negatives in raw timing space and re-derives the vector, using
-    several impostor archetypes:
+def _normalize_weights(raw, names):
+    raw = np.asarray(raw, dtype=float)
+    raw = np.clip(raw, 0.0, None)
+    if raw.sum() <= 1e-12:
+        raw = np.ones(len(raw), dtype=float)
+    raw = raw / raw.sum()
+    return {name: float(weight) for name, weight in zip(names, raw)}
 
-    ``jitter``   someone typing the password almost right (the hard negative)
-    ``slow``     hunt-and-peck typist
-    ``fast``     faster typist with a different rhythm
-    ``flat``     uniform intervals -- scripted or replayed input
-    ``shuffle``  the user's own intervals in the wrong order: same overall
-                 speed, wrong rhythm, which forces the model to learn rhythm
-                 rather than just how fast the password gets typed
-    ``random``   broad draws across a plausible human range
-    """
-    rng = rng or np.random.default_rng(config.RANDOM_SEED)
-    authentic = np.atleast_2d(np.asarray(authentic, dtype=float))
 
-    decomposed = [features.decompose(row, n_chars, extended) for row in authentic]
-    holds = np.array([d[0] for d in decomposed])
-    dds = np.array([d[1] for d in decomposed])
-    uds = np.array([d[2] for d in decomposed])
-    uus = np.array([d[3] for d in decomposed])
+def _infer_layout(vector_dim):
+    for n_chars in range(1, 256):
+        if features.feature_dim(n_chars, True) == vector_dim:
+            return n_chars, True
+        if features.feature_dim(n_chars, False) == vector_dim:
+            return n_chars, False
+    return None, False
 
-    std_hold = _column_std(holds)
-    std_dd = _column_std(dds)
-    std_ud = _column_std(uds)
-    std_uu = _column_std(uus)
 
-    if count is None:
-        count = int(
-            np.clip(
-                len(authentic) * config.NEGATIVE_RATIO,
-                config.MIN_NEGATIVES,
-                config.MAX_NEGATIVES,
-            )
-        )
+def _project_features(X, n_chars, extended, feature_set):
+    X = np.atleast_2d(np.asarray(X, dtype=float))
+    if n_chars is None:
+        return X
+    return features.select_set(X, n_chars, extended, feature_set)
 
-    archetypes = ("jitter", "slow", "fast", "flat", "shuffle", "random")
-    negatives = []
 
-    for i in range(count):
-        source = i % len(authentic)
-        hold = holds[source].copy()
-        dd = dds[source].copy()
-        ud = uds[source].copy()
-        uu = uus[source].copy()
-        kind = archetypes[i % len(archetypes)]
+def _learn_fusion_weights(model, X_pos, X_neg):
+    details_pos = model.analyse(X_pos)
+    details_neg = model.analyse(X_neg)
+    names = list(model.detector_order)
 
-        if kind == "jitter":
-            scale = 3.0
-            hold += rng.normal(0, np.maximum(std_hold * scale, hold * 0.35 + 0.01))
-            dd += rng.normal(0, np.maximum(std_dd * scale, dd * 0.35 + 0.01))
-            ud += rng.normal(0, np.maximum(std_ud * scale, np.abs(ud) * 0.35 + 0.01))
-            uu += rng.normal(0, np.maximum(std_uu * scale, uu * 0.35 + 0.01))
+    learned = []
+    for name in names:
+        pos = details_pos["scores"][name]
+        neg = details_neg["scores"][name]
+        separation = max(0.0, float(np.mean(pos) - np.mean(neg)))
+        stability = max(0.0, 1.0 - float(np.std(pos)))
+        learned.append(separation * stability)
 
-        elif kind in ("slow", "fast"):
-            factor = rng.uniform(1.4, 2.5) if kind == "slow" else rng.uniform(0.35, 0.7)
-            hold = hold * factor + rng.normal(0, std_hold, hold.shape)
-            dd = dd * factor + rng.normal(0, std_dd, dd.shape)
-            ud = ud * factor + rng.normal(0, std_ud, ud.shape)
-            uu = uu * factor + rng.normal(0, std_uu, uu.shape)
-
-        elif kind == "flat":
-            hold = np.full_like(hold, hold.mean() if hold.size else 0.1)
-            hold += rng.normal(0, 0.004, hold.shape)
-            if dd.size:
-                dd = np.full_like(dd, dd.mean()) + rng.normal(0, 0.004, dd.shape)
-                ud = np.full_like(ud, ud.mean()) + rng.normal(0, 0.004, ud.shape)
-                uu = np.full_like(uu, uu.mean()) + rng.normal(0, 0.004, uu.shape)
-
-        elif kind == "shuffle":
-            hold = rng.permutation(hold)
-            if dd.size:
-                order = rng.permutation(dd.size)
-                dd, ud, uu = dd[order], ud[order], uu[order]
-            hold += rng.normal(0, std_hold * 0.5, hold.shape)
-
-        else:  # random
-            hold = rng.uniform(0.03, 0.30, hold.shape)
-            dd = rng.uniform(0.05, 0.60, dd.shape)
-            ud = rng.uniform(-0.05, 0.50, ud.shape)
-            uu = rng.uniform(0.05, 0.60, uu.shape)
-
-        hold = np.maximum(hold, _MIN_HOLD)
-        dd = np.maximum(dd, _MIN_GAP)
-        uu = np.maximum(uu, _MIN_GAP)
-        ud = np.maximum(ud, _MIN_UD)
-
-        negatives.append(features.assemble(hold, dd, ud, uu, extended=extended))
-
-    return np.array(negatives)
+    prior = np.array(
+        [config.GLOBAL_FUSION_WEIGHTS.get(name, 1.0) for name in names], dtype=float
+    )
+    prior = prior / prior.sum()
+    shrink = min(1.0, len(X_pos) / float(config.FUSION_SHRINK_SAMPLES))
+    combined = shrink * np.asarray(learned, dtype=float) + (1.0 - shrink) * prior
+    weights = _normalize_weights(combined, names)
+    model.weights = weights
+    return weights
 
 
 def train(authentic, negatives, choice_train=HARSH, timestamps=None, now=None):
-    """Fit the soft-voting ensemble.
-
-    Returns ``(model, scaler, info)``.
-    """
+    """Fit the calibrated detector ensemble."""
     authentic = np.atleast_2d(np.asarray(authentic, dtype=float))
     negatives = np.atleast_2d(np.asarray(negatives, dtype=float))
-
     weighted, counts = replicate_by_recency(authentic, timestamps, now=now)
 
-    X = np.vstack([weighted, negatives])
-    y = np.hstack([np.ones(len(weighted)), np.zeros(len(negatives))])
+    svm, knn, forest = _build_estimators(choice_train, n_samples=len(weighted) + len(negatives))
+    detectors = {
+        "anchor": ScaledManhattanDetector(),
+        "svm": CalibratedEstimator("svm", svm, DETECTOR_FEATURES["svm"]),
+        "knn": CalibratedEstimator("knn", knn, DETECTOR_FEATURES["knn"]),
+        "rf": CalibratedEstimator("rf", forest, DETECTOR_FEATURES["rf"]),
+    }
 
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    n_chars, extended = _infer_layout(authentic.shape[1])
 
-    svm, knn, forest = build_estimators(choice_train, n_samples=len(X))
-    model = VotingClassifier(
-        estimators=[("svm", svm), ("knn", knn), ("rf", forest)], voting="soft"
+    for detector in detectors.values():
+        detector.fit(weighted, negatives, n_chars, extended)
+
+    model = FusionModel(
+        n_chars=n_chars,
+        extended=extended,
+        detectors=detectors,
+        weights=_normalize_weights(
+            [config.GLOBAL_FUSION_WEIGHTS[k] for k in ("anchor", "svm", "knn", "rf")],
+            ("anchor", "svm", "knn", "rf"),
+        ),
     )
-    model.fit(X_scaled, y)
+    weights = _learn_fusion_weights(model, authentic, negatives)
 
     info = {
         "authentic_samples": int(len(authentic)),
@@ -271,8 +407,14 @@ def train(authentic, negatives, choice_train=HARSH, timestamps=None, now=None):
         "negatives": int(len(negatives)),
         "replication": counts.tolist(),
         "model_choice": normalize_choice(choice_train),
+        "fusion_weights": weights,
     }
-    return model, scaler, info
+    return model, IdentityScaler(), info
+
+
+def analyse(model, vector):
+    """Detailed per-detector analysis for a sample or matrix."""
+    return model.analyse(np.asarray(vector, dtype=float))
 
 
 def score(model, scaler, vector):

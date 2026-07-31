@@ -107,6 +107,25 @@ function esc(s) {
   ));
 }
 
+let appConfig = null;
+
+function fillSelect(selectId, values, selected) {
+  const el = $(selectId);
+  if (!el) return;
+  el.innerHTML = values.map((value) =>
+    `<option value="${esc(value)}"${value === selected ? ' selected' : ''}>${esc(value)}</option>`
+  ).join('');
+}
+
+async function loadConfig() {
+  const res = await fetch('/api/config');
+  appConfig = await res.json();
+  const policies = appConfig.adaptation_policies || [];
+  const selected = appConfig.default_adaptation_policy || '';
+  fillSelect('reg-policy', policies, selected);
+  fillSelect('ret-policy', policies, selected);
+}
+
 /* -------------------------------------------------------------------- tabs */
 document.querySelectorAll('.tab').forEach((tab) => {
   tab.addEventListener('click', () => {
@@ -195,6 +214,7 @@ document.getElementById('ctx-refresh').addEventListener('click', loadContext);
       user_id: $('reg-user').value.trim(),
       password,
       model_choice: $('reg-model').value,
+      adaptation_policy: $('reg-policy').value,
       samples,
     });
 
@@ -215,6 +235,7 @@ document.getElementById('ctx-refresh').addEventListener('click', loadContext);
         <tr><th>Features per sample</th><td class="num">${p.features}</td></tr>
         <tr><th>Synthetic negatives</th><td class="num">${data.info.negatives}</td></tr>
         <tr><th>Model preset</th><td class="num">${data.info.model_choice === 1 ? 'Harsh' : 'Easy'}</td></tr>
+        <tr><th>Adaptation policy</th><td class="num">${esc(data.profile.adaptation_policy)}</td></tr>
         <tr><th>Starting threshold</th><td class="num">${p.threshold}</td></tr>
       </table>`;
     $('reg-result').classList.remove('hidden');
@@ -258,8 +279,10 @@ document.getElementById('ctx-refresh').addEventListener('click', loadContext);
     let notes = '';
     if (data.adopted) notes += '<li>This sample was added to your profile (adaptive learning).</li>';
     if (data.retrained) notes += '<li>The profile was automatically retrained on your recent typing.</li>';
+    if (data.quarantined && !data.adopted) notes += '<li>This sample entered the quarantine buffer for later promotion review.</li>';
     if (data.lockout) notes += `<li>Adaptive learning paused: ${esc(data.lockout)}</li>`;
     if (data.analysis) notes += `<li><strong>${esc(data.analysis.verdict)}:</strong> ${esc(data.analysis.message)}</li>`;
+    if (data.quality && data.quality.flags.length) notes += `<li>Quality: ${data.quality.flags.map(esc).join('; ')}</li>`;
     if (r.factors.length) notes += `<li>Context: ${r.factors.map(esc).join('; ')}</li>`;
 
     const t = data.timing || {};
@@ -270,6 +293,8 @@ document.getElementById('ctx-refresh').addEventListener('click', loadContext);
       <div class="scores">
         <div class="score"><div class="label">Biometric score</div><div class="value">${pct(data.probability)}</div></div>
         <div class="score"><div class="label">Required</div><div class="value">${pct(data.required)}</div></div>
+        <div class="score"><div class="label">Disagreement</div><div class="value">${pct(data.disagreement)}</div></div>
+        <div class="score"><div class="label">Quality</div><div class="value">${pct(data.quality ? data.quality.score : 0)}</div></div>
         <div class="score"><div class="label">Context risk</div>
           <div class="value"><span class="badge ${r.level}">${r.level}</span></div></div>
       </div>
@@ -341,6 +366,7 @@ document.getElementById('ctx-refresh').addEventListener('click', loadContext);
     const { data } = await post('/api/retrain', {
       user_id: $('ret-user').value.trim(),
       password,
+      adaptation_policy: $('ret-policy').value,
       samples,
     });
 
@@ -359,6 +385,7 @@ document.getElementById('ctx-refresh').addEventListener('click', loadContext);
         <tr><th>Window size</th><td class="num">${data.profile.samples} samples</td></tr>
         <tr><th>Effective positives</th><td class="num">${data.info.effective_positives} (recency-weighted)</td></tr>
         <tr><th>Synthetic negatives</th><td class="num">${data.info.negatives}</td></tr>
+        <tr><th>Adaptation policy</th><td class="num">${esc(data.profile.adaptation_policy)}</td></tr>
         <tr><th>Drift before retrain</th><td class="num">${data.drift_before} sd</td></tr>
       </table>`;
     $('ret-result').classList.remove('hidden');
@@ -414,3 +441,5 @@ async function showProfile(userId) {
 }
 
 loadProfiles();
+$('prof-refresh').addEventListener('click', loadProfiles);
+loadConfig();

@@ -48,16 +48,42 @@ MAX_AUTHENTIC_SAMPLES = 60
 RECENCY_HALF_LIFE_DAYS = 30.0
 MAX_REPLICATION = 4
 
+# --- Detector fusion --------------------------------------------------------
+DEFAULT_SCALER = "mad"       # standard | mad | winsorized_mad
+SCALER_CLIP = 5.0
+WINSOR_LIMIT = 0.05
+MANHATTAN_SCALE_FLOOR = 0.20
+
+GLOBAL_FUSION_WEIGHTS = {
+    "anchor": 0.35,
+    "svm": 0.30,
+    "knn": 0.20,
+    "rf": 0.15,
+}
+FUSION_SHRINK_SAMPLES = 25
+DEFAULT_ADAPTATION_POLICY = "quarantine_consensus_anchor"
+
+# --- Separate thresholds ----------------------------------------------------
+AUTH_THRESHOLD_FLOOR = 0.55
+UPDATE_THRESHOLD_MARGIN = 0.10
+UPDATE_THRESHOLD_FLOOR = 0.80
+DISAGREEMENT_LIMIT = 0.12
+UPDATE_RISK_LIMIT = 0.25
+ANCHOR_CANDIDATE_LIMIT = 2.00
+
 # --- Adaptive learning -------------------------------------------------------
-# A successful verification is folded back into the profile only when the model
-# is well clear of the acceptance bar and the context looks ordinary.
+# A successful verification enters quarantine only when it is well clear of the
+# authentication bar, the detector ensemble agrees, and the sample still sits
+# close to the trusted anchor profile.
 ADAPTIVE_LEARNING = True
-# Absolute confidence floor for adoption.
-AUTO_ADOPT_MIN_PROB = 0.75
-# ...and it must also clear the bar it was actually judged against by this much,
-# so adoption stays selective for users whose scores run low or high.
-AUTO_ADOPT_MARGIN = 0.15
-AUTO_RETRAIN_AFTER = 5
+QUARANTINE_MIN_SAMPLES = 3
+QUARANTINE_MAX_SAMPLES = 12
+QUARANTINE_CONSISTENCY_LIMIT = 1.25
+QUARANTINE_MIN_SPAN_SECONDS = 30.0
+PROMOTION_ALPHA = 0.05
+TRUST_DISAGREEMENT_SCALE = 0.25
+MAX_PROMOTION_FEATURE_STEP = 0.75
+SUPERVISED_RETRAIN_INTERVAL = 5
 
 # Anti-poisoning bound. Every adopted sample must individually beat the bar
 # above, which limits how far any single login can move the template -- but an
@@ -70,11 +96,28 @@ AUTO_RETRAIN_AFTER = 5
 # samples age out and the profile legitimately becomes mostly auto-adopted,
 # which would disable adaptation permanently.
 MAX_TEMPLATE_DRIFT = 2.5
+MAX_PROMOTION_SHIFT = 0.35
+PER_FEATURE_DRIFT_LIMIT = 3.0
+
+# --- Sample quality and replay detection -----------------------------------
+QUALITY_REJECT_FLOOR = 0.25
+QUALITY_UPDATE_FLOOR = 0.70
+QUALITY_MAX_RESOLUTION_RATIO = 0.60
+QUALITY_MAX_REPEAT_RATIO = 0.80
+QUALITY_MAX_TOTAL_Z = 4.0
+REPLAY_QUANTIZATION_MS = 2.0
+MAX_FINGERPRINT_HISTORY = 64
+
+# --- Profile versioning -----------------------------------------------------
+MAX_PROFILE_VERSIONS = 12
 
 # --- Drift detection ---------------------------------------------------------
 DRIFT_MIN_SAMPLES = 10
 DRIFT_WINDOW = 5          # samples compared at each end of the history
 DRIFT_Z_THRESHOLD = 1.0   # mean |z| shift above this is reported as drift
+STRONG_DRIFT_Z_THRESHOLD = 1.75
+LIKELY_POISONING_ANCHOR_FRACTION = 0.80
+HETEROGENEOUS_CLUSTER_THRESHOLD = 1.75
 
 # Drift measured over stored samples can only see logins that were accepted.
 # Once a user drifts far enough to start failing, nothing new enters the

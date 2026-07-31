@@ -53,6 +53,11 @@ The system includes:
 - **Dynamic Thresholding**: Adjusts the acceptance threshold from the user's own score history, sitting at the lower edge of their genuine distribution.
 - **Adaptive Retraining**: The profile follows the user's typing as it changes — a sliding window, recency weighting, automatic adoption of confident logins, and drift detection.
 
+Two additions in the current implementation that matter for experiments:
+
+- **Adaptation Policies**: the adaptation layer is policy-driven, with baselines ranging from `frozen` to the default `quarantine_consensus_anchor`.
+- **Poisoning Simulation**: built-in attack strategies can be replayed against stored profiles to inspect acceptance, quarantine, promotion and anchor drift step by step.
+
 ## Installation
 
 To get started with the Keystroke Authentication System, follow these steps:
@@ -103,7 +108,9 @@ Select an option:
 2. Retrain an existing user model
 3. Verify an existing user
 4. Profile status and drift report
-5. Exit
+5. Roll back to a saved profile version
+6. Run poisoning simulator
+7. Exit
 ```
 
 ---
@@ -114,7 +121,7 @@ Select an option:
 python webapp.py
 ```
 
-Then open <http://127.0.0.1:5000>. Four tabs: **Register**, **Verify**, **Retrain**, **Profiles**.
+Then open <http://127.0.0.1:5000>. Five tabs: **Register**, **Verify**, **Retrain**, **Profiles**, **Context**.
 
 Everything below the transport layer — features, models, risk, drift, storage — is shared with the CLI. Only the way keystrokes are captured differs, and that difference matters:
 
@@ -312,6 +319,11 @@ The two presets ("Harsh" and "Easy") differ in strictness — regularisation, ne
 
 ### Synthetic negatives
 
+Implementation update as of Friday, July 31, 2026:
+
+- The code now ships eight named generators: `global_speed_shift`, `per_key_jitter`, `rhythm_permutation`, `partial_mimicry`, `time_scaled_replay`, `anchor_walk_adversary`, `boundary_seeking_negative`, and `population_derived_impostor`.
+- Generator metadata is preserved in `synthetic_meta.pkl`, so experiments can attribute results to the exact negative family that produced each sample.
+
 Negatives are built in raw timing space and the feature vector re-derived from them, so aggregate features always stay consistent with the per-key values they summarise. Six impostor archetypes are generated:
 
 | Archetype | Models |
@@ -343,6 +355,11 @@ Recorded scores are cleared on a **manual** retrain, where the user has delibera
 
 ## Adaptive Retraining
 
+Implementation update as of Friday, July 31, 2026:
+
+- Adaptation is now policy-driven rather than one fixed path. The shipped policies range from `frozen` and `high_confidence` baselines to the default `quarantine_consensus_anchor`.
+- The default policy requires higher adaptation confidence, low disagreement, low contextual risk, anchor proximity, and quarantine consensus before promotion.
+
 Retraining is not only a manual action. Three mechanisms keep the profile tracking the user:
 
 1. **Sliding window with recency weighting.** Only the newest samples are kept, and recent ones dominate the fit. Recency is expressed by *replicating* recent rows rather than via `sample_weight`, because `VotingClassifier` only forwards sample weights when every estimator accepts them — and `KNeighborsClassifier` does not.
@@ -365,6 +382,12 @@ Repeated rejections with a correct password have two very different causes, and 
 Cohesion — how tightly the rejected attempts agree with each other, relative to the profile's own spread — is what separates the two. Rejected attempts are kept **for reporting only and are never fed to the model**; retraining still requires the password and freshly captured typing.
 
 ### Guarding against template poisoning
+
+Implementation update as of Friday, July 31, 2026:
+
+- Samples are quality-scored and checked for replay-like fingerprints before adaptation.
+- Quarantine promotion is bounded by anchor drift, per-feature drift, and trust-weighted movement limits.
+- A built-in simulator can now replay named attacker strategies such as `replay_attacker`, `gradual_walk_attacker`, and `feedback_aware_attacker`.
 
 Auto-adoption is a write path into the model, so it has three independent guards:
 
@@ -395,6 +418,14 @@ All user-related data is stored locally in the `user_data/<user_id>/` folder:
 | `recent_failures.pkl` | Rejected attempts that had the correct password (reporting only) |
 | `history.pkl` | Enrollment / retrain / drift event log |
 
+Additional files in the current implementation:
+
+- `anchor_data.npy`: trusted anchor samples captured at enroll or supervised retrain
+- `synthetic_meta.pkl`: generator label and metadata for each synthetic negative
+- `quarantine.pkl`: pending high-confidence samples awaiting promotion
+- `versions.pkl`: saved active-profile snapshots for rollback
+- `recent_sample_fingerprints.pkl`: replay and duplicate-sample history
+
 ### Password storage
 
 Passwords are stored as a **salted hash**, never in recoverable form. scrypt is used where available (N=16384, r=8, p=1 — roughly 16 MB of memory per hash, which makes bulk offline guessing expensive rather than merely slow), with PBKDF2-HMAC-SHA256 at 480,000 rounds as the fallback. Each hash gets its own 16-byte random salt, and verification uses a constant-time comparison so timing cannot reveal how much of a guess was correct.
@@ -421,6 +452,14 @@ Public IP lookup is the one exception: it contacts a third-party service, so it 
 
 ## Future Enhancements
 
+As of Friday, July 31, 2026, the core policy/simulator implementation is done. The main remaining work is:
+
+- longitudinal evaluation on a dataset with genuine temporal drift
+- adversarial reporting using the built-in poisoning simulator
+- trained-impostor experiments
+- fitting hand-tuned constants in `bauth/config.py` on held-out data
+- optional UI expansion for simulator control and richer user coaching
+
 The system is functional, but there are several areas for improvement:
 
 1. **Close the gap to the baseline.** The benchmark says a scaled Manhattan distance beats this project's ensemble (0.0905 vs 0.1331 EER). Either the ensemble earns its complexity or the distance metric should be the default detector, with the ensemble kept as an option. This is the most useful thing to work on next.
@@ -429,9 +468,9 @@ The system is functional, but there are several areas for improvement:
 
 3. **Fit the constants.** ~30 hand-set values in `bauth/config.py` — negative ratio, drift thresholds, adoption bars, risk weights — were tuned against simulated typists. The harness now exists to fit them on real data.
 
-4. **Longitudinal evaluation.** Adaptive retraining and the drift logic are the most novel parts and are entirely unmeasured. Needs a dataset with sessions spread over time (Clarkson II).
+4. **Longitudinal evaluation.** Adaptive retraining and the drift logic still need a dataset with sessions spread over time (Clarkson II or similar).
 
-5. **Adversarial evaluation of the poisoning bound.** `MAX_TEMPLATE_DRIFT` is asserted, not measured. It needs an adaptive attacker who deliberately walks the template.
+5. **Broader adversarial evaluation.** The repository now includes a simulator harness and an initial CMU-backed benchmark, but the poisoning bound still needs wider attack coverage and larger subject counts.
 
 6. **Trained impostors.** CMU impostors are zero-effort. Attempts by someone who has watched the genuine user type would be far more informative.
 
@@ -555,6 +594,16 @@ python run_eval.py --download    # fetch the dataset (~4.7 MB, not redistributed
 python run_eval.py               # full run, all 51 subjects, ~3 minutes
 ```
 
+### Adversarial benchmark
+
+An adversarial harness now ships alongside the static benchmark:
+
+```bash
+python run_adversarial.py --limit 10 --json docs/adversarial-results.json
+```
+
+This builds CMU-backed profiles, calibrates a held-out operating point for the benchmark, and then runs the sequential poisoning simulator under multiple adaptation policies and attacker strategies. The current repository artifact, [`docs/adversarial-results.json`](/C:/Users/12345/OneDrive/Documents/Aarsh%20All%20Data/Personal%20Projects(AntiGravity)/Behavioural_Secure_Authentication_/docs/adversarial-results.json), was generated on **Friday, July 31, 2026** over the first 10 CMU subjects.
+
 ### Protocol
 
 Exactly the one used in the paper. For each subject in turn, treated as the genuine user:
@@ -628,7 +677,7 @@ Redundancy is not automatically harmful — making structure explicit can help a
 The benchmark measures **one thing**: distinguishing a genuine user from zero-effort impostors on a fixed 10-character password, within one dataset. It says nothing about the parts of this project that are not classifier accuracy:
 
 - **Adaptive retraining and drift handling** need longitudinal data. CMU spans 8 sessions but published work uses it as a static benchmark; Clarkson II is the usual choice for template aging.
-- **The template-poisoning bound** is still asserted rather than measured — it needs an adaptive adversary, not a static test set.
+- **The template-poisoning bound** is now partially measured through the built-in simulator benchmark, but it still needs broader adversarial coverage than a static test set can provide.
 - **Contextual risk scoring** has no benchmark here at all; CMU carries no network or device metadata.
 - **Trained impostors.** CMU impostors are zero-effort — subjects typing a password that is not theirs, without practice. Against someone who has watched the genuine user type, all these numbers would be worse.
 

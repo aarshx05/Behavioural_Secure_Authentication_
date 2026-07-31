@@ -1,0 +1,3625 @@
+{
+  "subjects": [
+    "s002",
+    "s003",
+    "s004",
+    "s005",
+    "s007",
+    "s008",
+    "s010",
+    "s011",
+    "s012",
+    "s013"
+  ],
+  "policies": [
+    "frozen",
+    "high_confidence",
+    "anchor_bounded",
+    "quarantine_consensus_anchor"
+  ],
+  "attackers": [
+    "random_attacker",
+    "replay_attacker",
+    "time_scaled_replay_attacker",
+    "mimicry_attacker",
+    "gradual_walk_attacker",
+    "feedback_aware_attacker"
+  ],
+  "genuine_steps": 10,
+  "attacker_steps": 10,
+  "max_train_samples": 60,
+  "per_subject": [
+    {
+      "subject": "s002",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.18405507970481022
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11757257878145184
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.139307998191546,
+              "final_anchor_shift": 0.0,
+              "lockouts": 4
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8108079853994237,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.36477927831609075,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.37784331183197367,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.29238990979294377,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09561220004224755,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.04130907355626558,
+            "max_anchor_shift": 0.04589897061807287,
+            "mean_probability": 0.12872810567946302
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.020922850721635473,
+            "max_anchor_shift": 0.04184570144327095,
+            "mean_probability": 0.08459534034398772
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.139307998191546,
+              "final_anchor_shift": 0.0,
+              "lockouts": 4
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.44072341727496606,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.021997657590845453,
+              "max_anchor_shift": 0.024441841767606057,
+              "mean_probability": 0.22345114244119188,
+              "final_anchor_shift": 0.024441841767606057,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.03515131813114005,
+              "max_anchor_shift": 0.03515131813114006,
+              "mean_probability": 0.21608567397922268,
+              "final_anchor_shift": 0.03515131813114006,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.29238990979294377,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01610568742513773,
+              "max_anchor_shift": 0.016105687425137728,
+              "mean_probability": 0.22444436047348865,
+              "final_anchor_shift": 0.016105687425137728,
+              "lockouts": 0
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.04130907355626558,
+            "max_anchor_shift": 0.04589897061807287,
+            "mean_probability": 0.12872810567946302
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.01277228888423303,
+            "max_anchor_shift": 0.04257429628077676,
+            "mean_probability": 0.09087892555275594
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.139307998191546,
+              "final_anchor_shift": 0.0,
+              "lockouts": 4
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.015563526938222568,
+              "max_anchor_shift": 0.017292807709136188,
+              "mean_probability": 0.4722407124595562,
+              "final_anchor_shift": 0.017292807709136188,
+              "lockouts": 1
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.025190507796234406,
+              "max_anchor_shift": 0.03148813474529301,
+              "mean_probability": 0.2486595003660231,
+              "final_anchor_shift": 0.03148813474529301,
+              "lockouts": 2
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.03515131813114005,
+              "max_anchor_shift": 0.03515131813114006,
+              "mean_probability": 0.21608567397922268,
+              "final_anchor_shift": 0.03515131813114006,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.29238990979294377,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01610568742513773,
+              "max_anchor_shift": 0.016105687425137728,
+              "mean_probability": 0.22444436047348865,
+              "final_anchor_shift": 0.016105687425137728,
+              "lockouts": 0
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.18405507970481022
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11757257878145184
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.139307998191546,
+              "final_anchor_shift": 0.0,
+              "lockouts": 4
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.009426991427628362,
+              "max_anchor_shift": 0.015711652379380603,
+              "mean_probability": 0.5555831449233268,
+              "final_anchor_shift": 0.015711652379380603,
+              "lockouts": 2
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.36477927831609075,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0629885735233496,
+              "max_anchor_shift": 0.07873571690418701,
+              "mean_probability": 0.27076315275299195,
+              "final_anchor_shift": 0.07873571690418701,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.29238990979294377,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09561220004224755,
+              "final_anchor_shift": 0.0,
+              "lockouts": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s003",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.09228210239085066
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.8,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.05455727936059544
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.04886586022539007,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.7934244919764017,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3970916632852106,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3167229359024422,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3451761605737036,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.7,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11580920638645793,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.8,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.014336229459757608,
+            "max_anchor_shift": 0.047787431532525355,
+            "mean_probability": 0.1075364927476806
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.040095859800869826,
+            "max_anchor_shift": 0.044550955334299806,
+            "mean_probability": 0.10487171910851459
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.04886586022539007,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3536400927533169,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0178042661735253,
+              "max_anchor_shift": 0.01978251797058367,
+              "mean_probability": 0.18994699136625526,
+              "final_anchor_shift": 0.01978251797058367,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0336113041703344,
+              "max_anchor_shift": 0.033611304170334394,
+              "mean_probability": 0.21851441179409897,
+              "final_anchor_shift": 0.033611304170334394,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3451761605737036,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.7,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11580920638645793,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.8,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.014336229459757608,
+            "max_anchor_shift": 0.047787431532525355,
+            "mean_probability": 0.1075364927476806
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.040095859800869826,
+            "max_anchor_shift": 0.044550955334299806,
+            "mean_probability": 0.10487171910851459
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.04886586022539007,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.018608371282416953,
+              "max_anchor_shift": 0.02658338754630993,
+              "mean_probability": 0.49406215752233784,
+              "final_anchor_shift": 0.02658338754630993,
+              "lockouts": 3
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.020692231211636974,
+              "max_anchor_shift": 0.02586528901454622,
+              "mean_probability": 0.2218017533927567,
+              "final_anchor_shift": 0.02586528901454622,
+              "lockouts": 2
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0336113041703344,
+              "max_anchor_shift": 0.033611304170334394,
+              "mean_probability": 0.21851441179409897,
+              "final_anchor_shift": 0.033611304170334394,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3451761605737036,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.7,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11580920638645793,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.09228210239085066
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.8,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.05455727936059544
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.04886586022539007,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.7934244919764017,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3970916632852106,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3167229359024422,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3451761605737036,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.7,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11580920638645793,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s004",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11766641290319815
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.6,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.08921765443292777
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.08610643013093318,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8047914847745241,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.38752174390012256,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4667467791874464,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3881392410122784,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10368284668285259,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02517145991459859,
+            "max_anchor_shift": 0.025171459914598595,
+            "mean_probability": 0.13543363350833781
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.020970570929916117,
+            "max_anchor_shift": 0.020970570929916117,
+            "mean_probability": 0.14766098966328814
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.08610643013093318,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4706370909890286,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01102092525848578,
+              "max_anchor_shift": 0.012245472509428645,
+              "mean_probability": 0.2414999175254196,
+              "final_anchor_shift": 0.012245472509428645,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01681585309415359,
+              "max_anchor_shift": 0.01681585309415359,
+              "mean_probability": 0.30187374159121777,
+              "final_anchor_shift": 0.01681585309415359,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3881392410122784,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10368284668285259,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.017310939133841134,
+            "max_anchor_shift": 0.017310939133841134,
+            "mean_probability": 0.1379461676369936
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.020970570929916117,
+            "max_anchor_shift": 0.020970570929916117,
+            "mean_probability": 0.14766098966328814
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.08610643013093318,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.011487420667847612,
+              "max_anchor_shift": 0.01641060095406802,
+              "mean_probability": 0.5714268178209849,
+              "final_anchor_shift": 0.01641060095406802,
+              "lockouts": 3
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01611149077249548,
+              "max_anchor_shift": 0.023016415389279253,
+              "mean_probability": 0.2674861907868964,
+              "final_anchor_shift": 0.023016415389279253,
+              "lockouts": 3
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01681585309415359,
+              "max_anchor_shift": 0.01681585309415359,
+              "mean_probability": 0.30187374159121777,
+              "final_anchor_shift": 0.01681585309415359,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3881392410122784,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10368284668285259,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11766641290319815
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.6,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.08921765443292777
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.08610643013093318,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.00832566720916745,
+              "max_anchor_shift": 0.0166513344183349,
+              "mean_probability": 0.6008096944202566,
+              "final_anchor_shift": 0.0166513344183349,
+              "lockouts": 3
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.020493806172103786,
+              "max_anchor_shift": 0.04098761234420757,
+              "mean_probability": 0.30485148163374526,
+              "final_anchor_shift": 0.04098761234420757,
+              "lockouts": 3
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.040847744641192785,
+              "max_anchor_shift": 0.08169548928238557,
+              "mean_probability": 0.3643368465122062,
+              "final_anchor_shift": 0.08169548928238557,
+              "lockouts": 3
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3881392410122784,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10368284668285259,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s005",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.6,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.1890047226825476
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.0787310076804464
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.14404722793617236,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.7960421361789404,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.345418373435033,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.41800937543265093,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3258862422779674,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09729822314775026,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.018294604134817254,
+            "max_anchor_shift": 0.022868255168521565,
+            "mean_probability": 0.14325543856369688
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.019609201083904487,
+            "max_anchor_shift": 0.032682001806507474,
+            "mean_probability": 0.08948670328381007
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.14404722793617236,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.41935079198487746,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.00820940221540648,
+              "max_anchor_shift": 0.009121558017118312,
+              "mean_probability": 0.20301599862903333,
+              "final_anchor_shift": 0.009121558017118312,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.030097506572250455,
+              "max_anchor_shift": 0.03009750657225045,
+              "mean_probability": 0.2536134110309812,
+              "final_anchor_shift": 0.03009750657225045,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3258862422779674,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09729822314775026,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.018294604134817254,
+            "max_anchor_shift": 0.022868255168521565,
+            "mean_probability": 0.14325543856369688
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.019609201083904487,
+            "max_anchor_shift": 0.032682001806507474,
+            "mean_probability": 0.08948670328381007
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.14404722793617236,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0032274930958769805,
+              "max_anchor_shift": 0.016137465479384903,
+              "mean_probability": 0.75453127325129,
+              "final_anchor_shift": 0.016137465479384903,
+              "lockouts": 8
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0032482246017336244,
+              "max_anchor_shift": 0.01624112300866812,
+              "mean_probability": 0.3230011115481595,
+              "final_anchor_shift": 0.01624112300866812,
+              "lockouts": 7
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.030097506572250455,
+              "max_anchor_shift": 0.03009750657225045,
+              "mean_probability": 0.2536134110309812,
+              "final_anchor_shift": 0.03009750657225045,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3258862422779674,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09729822314775026,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.04069591066829984,
+            "max_anchor_shift": 0.08139182133659968,
+            "mean_probability": 0.17383555206501766
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.0787310076804464
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.14404722793617236,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.7960421361789404,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.345418373435033,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.41800937543265093,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3258862422779674,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09729822314775026,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s007",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.21173364746122586
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11579720678563263
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11252193476348522,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8022723594502242,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.46361272653590524,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.38665607327110113,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.42562780467626143,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1367580387083325,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.21173364746122586
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11579720678563263
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11252193476348522,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.43866039515488586,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.010963030187310532,
+              "max_anchor_shift": 0.013703787734138167,
+              "mean_probability": 0.2734246909670862,
+              "final_anchor_shift": 0.013703787734138167,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.03204089798153098,
+              "max_anchor_shift": 0.03560099775725664,
+              "mean_probability": 0.24092911382847748,
+              "final_anchor_shift": 0.03560099775725664,
+              "lockouts": 1
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.42562780467626143,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01743448974498282,
+              "max_anchor_shift": 0.01743448974498282,
+              "mean_probability": 0.21250910793585862,
+              "final_anchor_shift": 0.01743448974498282,
+              "lockouts": 0
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.21173364746122586
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11579720678563263
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11252193476348522,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01268209593921498,
+              "max_anchor_shift": 0.018117279913164256,
+              "mean_probability": 0.5339271958469994,
+              "final_anchor_shift": 0.018117279913164256,
+              "lockouts": 3
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.012699170916410865,
+              "max_anchor_shift": 0.01814167273772981,
+              "mean_probability": 0.29350994065744385,
+              "final_anchor_shift": 0.01814167273772981,
+              "lockouts": 2
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.03204089798153098,
+              "max_anchor_shift": 0.03560099775725664,
+              "mean_probability": 0.24092911382847748,
+              "final_anchor_shift": 0.03560099775725664,
+              "lockouts": 1
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.42562780467626143,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01803601750189173,
+              "max_anchor_shift": 0.018036017501891728,
+              "mean_probability": 0.21261014940883888,
+              "final_anchor_shift": 0.018036017501891728,
+              "lockouts": 0
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.21173364746122586
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11579720678563263
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.11252193476348522,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8022723594502242,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.46361272653590524,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.38665607327110113,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.42562780467626143,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1367580387083325,
+              "final_anchor_shift": 0.0,
+              "lockouts": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s008",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.0781789790601605
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.03713740558088159
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.17831499828504613,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8064516442533088,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3214968105127007,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3139886279867025,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065102427383562,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1544362048320625,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.018216032921819267,
+            "max_anchor_shift": 0.036432065843638534,
+            "mean_probability": 0.09069839359016574
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.030777255382081193,
+            "max_anchor_shift": 0.03419695042453466,
+            "mean_probability": 0.1026971797917459
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.17831499828504613,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.37182633889184646,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.024914934773452097,
+              "max_anchor_shift": 0.027683260859391223,
+              "mean_probability": 0.2027681327162138,
+              "final_anchor_shift": 0.027683260859391223,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.025151137214946263,
+              "max_anchor_shift": 0.02515113721494626,
+              "mean_probability": 0.20951565017040846,
+              "final_anchor_shift": 0.02515113721494626,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065102427383562,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.024170941210010396,
+              "max_anchor_shift": 0.024170941210010396,
+              "mean_probability": 0.2799804351695635,
+              "final_anchor_shift": 0.024170941210010396,
+              "lockouts": 0
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.018216032921819267,
+            "max_anchor_shift": 0.036432065843638534,
+            "mean_probability": 0.09069839359016574
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.03713740558088159
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.17831499828504613,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01795618265924822,
+              "max_anchor_shift": 0.01795618265924822,
+              "mean_probability": 0.3574326864666085,
+              "final_anchor_shift": 0.01795618265924822,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.024914934773452097,
+              "max_anchor_shift": 0.027683260859391223,
+              "mean_probability": 0.2027681327162138,
+              "final_anchor_shift": 0.027683260859391223,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.025151137214946263,
+              "max_anchor_shift": 0.02515113721494626,
+              "mean_probability": 0.20951565017040846,
+              "final_anchor_shift": 0.02515113721494626,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065102427383562,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.024170941210010396,
+              "max_anchor_shift": 0.024170941210010396,
+              "mean_probability": 0.2799804351695635,
+              "final_anchor_shift": 0.024170941210010396,
+              "lockouts": 0
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.0781789790601605
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.03713740558088159
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.17831499828504613,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8064516442533088,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3214968105127007,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.7,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.022862091241207902,
+              "max_anchor_shift": 0.057155228103019755,
+              "mean_probability": 0.3020426820229334,
+              "final_anchor_shift": 0.057155228103019755,
+              "lockouts": 4
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065102427383562,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1544362048320625,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s010",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.26760176687265946
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11571940453825054
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09232852179656915,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8060725457803276,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.37853787527334964,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.3809936249539911,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4083641006913198,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.12872665932095467,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02835497063372236,
+            "max_anchor_shift": 0.03544371329215295,
+            "mean_probability": 0.21265769779835622
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02108396393804045,
+            "max_anchor_shift": 0.0421679278760809,
+            "mean_probability": 0.13343854712999154
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09232852179656915,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.5509233959518284,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.014869108969467498,
+              "max_anchor_shift": 0.018586386211834373,
+              "mean_probability": 0.2873548112428105,
+              "final_anchor_shift": 0.018586386211834373,
+              "lockouts": 2
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.02012320738875006,
+              "max_anchor_shift": 0.02012320738875006,
+              "mean_probability": 0.28600927444322916,
+              "final_anchor_shift": 0.02012320738875006,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4083641006913198,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.12872665932095467,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02835497063372236,
+            "max_anchor_shift": 0.03544371329215295,
+            "mean_probability": 0.21265769779835622
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.3,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02108396393804045,
+            "max_anchor_shift": 0.0421679278760809,
+            "mean_probability": 0.13343854712999154
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09232852179656915,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.018730685357154962,
+              "max_anchor_shift": 0.01873068535715496,
+              "mean_probability": 0.5533328415067555,
+              "final_anchor_shift": 0.01873068535715496,
+              "lockouts": 2
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.02207124140403095,
+              "max_anchor_shift": 0.03153034486290136,
+              "mean_probability": 0.2829865100275437,
+              "final_anchor_shift": 0.03153034486290136,
+              "lockouts": 3
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.02012320738875006,
+              "max_anchor_shift": 0.02012320738875006,
+              "mean_probability": 0.28600927444322916,
+              "final_anchor_shift": 0.02012320738875006,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4083641006913198,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.12872665932095467,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.7,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.019767112717726482,
+            "max_anchor_shift": 0.06589037572575494,
+            "mean_probability": 0.2766999239037608
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.11571940453825054
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.09232852179656915,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.012619802489789509,
+              "max_anchor_shift": 0.02103300414964918,
+              "mean_probability": 0.5827020919349621,
+              "final_anchor_shift": 0.02103300414964918,
+              "lockouts": 2
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.37853787527334964,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.047742320116995,
+              "max_anchor_shift": 0.07957053352832501,
+              "mean_probability": 0.3237163256403333,
+              "final_anchor_shift": 0.07957053352832501,
+              "lockouts": 2
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4083641006913198,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.12872665932095467,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s011",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.8,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.23794256930731175
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.06528456139612013
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1069281873003666,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.7932572789014604,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4206627992372442,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4198562189449603,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.32609639582776884,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10616572197898573,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.03903682984224835,
+            "max_anchor_shift": 0.04337425538027594,
+            "mean_probability": 0.12481584904748406
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.009656181038502786,
+            "max_anchor_shift": 0.03218727012834262,
+            "mean_probability": 0.058394794071273
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1069281873003666,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.33430294110644915,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.017878021468293235,
+              "max_anchor_shift": 0.019864468298103594,
+              "mean_probability": 0.20835460568655706,
+              "final_anchor_shift": 0.019864468298103594,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.03870488606098606,
+              "max_anchor_shift": 0.038704886060986064,
+              "mean_probability": 0.24490304909370003,
+              "final_anchor_shift": 0.038704886060986064,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.32609639582776884,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10616572197898573,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.03903682984224835,
+            "max_anchor_shift": 0.04337425538027594,
+            "mean_probability": 0.12481584904748406
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.009656181038502786,
+            "max_anchor_shift": 0.03218727012834262,
+            "mean_probability": 0.058394794071273
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1069281873003666,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.017431597084267707,
+              "max_anchor_shift": 0.019368441204741894,
+              "mean_probability": 0.3802494375496769,
+              "final_anchor_shift": 0.019368441204741894,
+              "lockouts": 1
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.037524673664292144,
+              "max_anchor_shift": 0.04690584208036518,
+              "mean_probability": 0.22177105995903337,
+              "final_anchor_shift": 0.04690584208036518,
+              "lockouts": 2
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.03870488606098606,
+              "max_anchor_shift": 0.038704886060986064,
+              "mean_probability": 0.24490304909370003,
+              "final_anchor_shift": 0.038704886060986064,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.32609639582776884,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10616572197898573,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.5,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.04595167797920018,
+            "max_anchor_shift": 0.09190335595840037,
+            "mean_probability": 0.19643439926228107
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.2,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.06528456139612013
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.1069281873003666,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.4,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.007367067436239735,
+              "max_anchor_shift": 0.010524382051771052,
+              "mean_probability": 0.41744030960891854,
+              "final_anchor_shift": 0.010524382051771052,
+              "lockouts": 1
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4206627992372442,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4198562189449603,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.32609639582776884,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.6,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10616572197898573,
+              "final_anchor_shift": 0.0,
+              "lockouts": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s012",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.6,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.24858172994623398
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.15248110588379887
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.093788016384068,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8029714529779127,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.34281552343648436,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.30489424091286144,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.2538043140755243,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.21006325107468404,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.03865686839945702,
+            "max_anchor_shift": 0.03865686839945701,
+            "mean_probability": 0.16002486087511783
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.15248110588379887
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.093788016384068,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.36611800428395774,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01556963564338677,
+              "max_anchor_shift": 0.019462044554233462,
+              "mean_probability": 0.22456088467522356,
+              "final_anchor_shift": 0.019462044554233462,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.02202413998963087,
+              "max_anchor_shift": 0.02753017498703859,
+              "mean_probability": 0.23460065717281595,
+              "final_anchor_shift": 0.02753017498703859,
+              "lockouts": 2
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.2538043140755243,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.21006325107468404,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.03865686839945702,
+            "max_anchor_shift": 0.03865686839945701,
+            "mean_probability": 0.16002486087511783
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.15248110588379887
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.093788016384068,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.010640617215909202,
+              "max_anchor_shift": 0.017734362026515335,
+              "mean_probability": 0.5495495652197997,
+              "final_anchor_shift": 0.017734362026515335,
+              "lockouts": 4
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.01556963564338677,
+              "max_anchor_shift": 0.019462044554233462,
+              "mean_probability": 0.22456088467522356,
+              "final_anchor_shift": 0.019462044554233462,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.02202413998963087,
+              "max_anchor_shift": 0.02753017498703859,
+              "mean_probability": 0.23460065717281595,
+              "final_anchor_shift": 0.02753017498703859,
+              "lockouts": 2
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.2538043140755243,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.21006325107468404,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.6,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.24858172994623398
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.4,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.15248110588379887
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.093788016384068,
+              "final_anchor_shift": 0.0,
+              "lockouts": 2
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0023203800921438463,
+              "max_anchor_shift": 0.023203800921438464,
+              "mean_probability": 0.8029714529779127,
+              "final_anchor_shift": 0.023203800921438464,
+              "lockouts": 7
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.34281552343648436,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.30489424091286144,
+              "final_anchor_shift": 0.0,
+              "lockouts": 7
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.2538043140755243,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.3,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.21006325107468404,
+              "final_anchor_shift": 0.0,
+              "lockouts": 3
+            }
+          }
+        }
+      }
+    },
+    {
+      "subject": "s013",
+      "policies": {
+        "frozen": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 1.0,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.28051073461242404
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.0,
+            "mean_anchor_shift": 0.0,
+            "max_anchor_shift": 0.0,
+            "mean_probability": 0.24843994178120948
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10027834232526608,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8100149254229333,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.40626238012778054,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.9,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.41490939779410213,
+              "final_anchor_shift": 0.0,
+              "lockouts": 9
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065306557175048,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10594435548175422,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        },
+        "high_confidence": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02188264396668387,
+            "max_anchor_shift": 0.021882643966683865,
+            "mean_probability": 0.22536460797074417
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.027418351916283286,
+            "max_anchor_shift": 0.027418351916283282,
+            "mean_probability": 0.1287338739223206
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10027834232526608,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.5004859344386012,
+              "final_anchor_shift": 0.0,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.024799157721169716,
+              "max_anchor_shift": 0.027554619690188572,
+              "mean_probability": 0.26900453833575144,
+              "final_anchor_shift": 0.027554619690188572,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.037139931336671365,
+              "max_anchor_shift": 0.037139931336671365,
+              "mean_probability": 0.2944226935187074,
+              "final_anchor_shift": 0.037139931336671365,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065306557175048,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.011257775228763079,
+              "max_anchor_shift": 0.01125777522876308,
+              "mean_probability": 0.24769461458032677,
+              "final_anchor_shift": 0.01125777522876308,
+              "lockouts": 0
+            }
+          }
+        },
+        "anchor_bounded": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.02188264396668387,
+            "max_anchor_shift": 0.021882643966683865,
+            "mean_probability": 0.22536460797074417
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.1,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.027418351916283286,
+            "max_anchor_shift": 0.027418351916283282,
+            "mean_probability": 0.1287338739223206
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10027834232526608,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.013886355059199957,
+              "max_anchor_shift": 0.013886355059199955,
+              "mean_probability": 0.5028125229871664,
+              "final_anchor_shift": 0.013886355059199955,
+              "lockouts": 0
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.2,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.024799157721169716,
+              "max_anchor_shift": 0.027554619690188572,
+              "mean_probability": 0.26900453833575144,
+              "final_anchor_shift": 0.027554619690188572,
+              "lockouts": 1
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.037139931336671365,
+              "max_anchor_shift": 0.037139931336671365,
+              "mean_probability": 0.2944226935187074,
+              "final_anchor_shift": 0.037139931336671365,
+              "lockouts": 0
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065306557175048,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.1,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.011257775228763079,
+              "max_anchor_shift": 0.01125777522876308,
+              "mean_probability": 0.24769461458032677,
+              "final_anchor_shift": 0.01125777522876308,
+              "lockouts": 0
+            }
+          }
+        },
+        "quarantine_consensus_anchor": {
+          "genuine": {
+            "attempts": 10,
+            "accept_rate": 0.9,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.013963165351601317,
+            "max_anchor_shift": 0.06981582675800659,
+            "mean_probability": 0.2606590742749302
+          },
+          "future_genuine": {
+            "attempts": 10,
+            "accept_rate": 0.6,
+            "promotion_rate": 0.1,
+            "mean_anchor_shift": 0.03352625962274819,
+            "max_anchor_shift": 0.08381564905687047,
+            "mean_probability": 0.20154443629167731
+          },
+          "attackers": {
+            "random_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10027834232526608,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            },
+            "replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.8100149254229333,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "time_scaled_replay_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.40626238012778054,
+              "final_anchor_shift": 0.0,
+              "lockouts": 8
+            },
+            "mimicry_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.8,
+              "promotion_rate": 0.1,
+              "mean_anchor_shift": 0.004509701390983296,
+              "max_anchor_shift": 0.02254850695491648,
+              "mean_probability": 0.3893116115079907,
+              "final_anchor_shift": 0.02254850695491648,
+              "lockouts": 5
+            },
+            "gradual_walk_attacker": {
+              "attempts": 10,
+              "accept_rate": 1.0,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.4065306557175048,
+              "final_anchor_shift": 0.0,
+              "lockouts": 10
+            },
+            "feedback_aware_attacker": {
+              "attempts": 10,
+              "accept_rate": 0.5,
+              "promotion_rate": 0.0,
+              "mean_anchor_shift": 0.0,
+              "max_anchor_shift": 0.0,
+              "mean_probability": 0.10594435548175422,
+              "final_anchor_shift": 0.0,
+              "lockouts": 5
+            }
+          }
+        }
+      }
+    }
+  ],
+  "summary": {
+    "frozen": {
+      "genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.74,
+        "promotion_rate": 0.0,
+        "mean_anchor_shift": 0.0,
+        "max_anchor_shift": 0.0,
+        "mean_probability": 0.19075577449414224
+      },
+      "future_genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.4600000000000001,
+        "promotion_rate": 0.0,
+        "mean_anchor_shift": 0.0,
+        "max_anchor_shift": 0.0,
+        "mean_probability": 0.10749381462213148
+      },
+      "attackers": {
+        "random_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.47000000000000003,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.11024875173388429,
+          "final_anchor_shift": 0.0,
+          "lockouts": 4.7
+        },
+        "replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 1.0,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.8026106305115457,
+          "final_anchor_shift": 0.0,
+          "lockouts": 10.0
+        },
+        "time_scaled_replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.96,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.3828199174059922,
+          "final_anchor_shift": 0.0,
+          "lockouts": 9.6
+        },
+        "mimicry_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.93,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.3800620586218232,
+          "final_anchor_shift": 0.0,
+          "lockouts": 9.3
+        },
+        "gradual_walk_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.95,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.3578525067383629,
+          "final_anchor_shift": 0.0,
+          "lockouts": 9.5
+        },
+        "feedback_aware_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.49000000000000005,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.12544967076560823,
+          "final_anchor_shift": 0.0,
+          "lockouts": 4.9
+        }
+      }
+    },
+    "high_confidence": {
+      "genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.27,
+        "promotion_rate": 0.09,
+        "mean_anchor_shift": 0.02452587128293699,
+        "max_anchor_shift": 0.03175156641159267,
+        "mean_probability": 0.1540248727242272
+      },
+      "future_genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.2,
+        "promotion_rate": 0.08,
+        "mean_anchor_shift": 0.01905342348112336,
+        "max_anchor_shift": 0.027601972985923585,
+        "mean_probability": 0.11181574599843631
+      },
+      "attackers": {
+        "random_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.47000000000000003,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.11024875173388429,
+          "final_anchor_shift": 0.0,
+          "lockouts": 4.7
+        },
+        "replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.12000000000000002,
+          "promotion_rate": 0.1,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.42466684028297574,
+          "final_anchor_shift": 0.0,
+          "lockouts": 0.2
+        },
+        "time_scaled_replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.21000000000000002,
+          "promotion_rate": 0.1,
+          "mean_anchor_shift": 0.016802614000134282,
+          "max_anchor_shift": 0.019244595761262605,
+          "mean_probability": 0.23233817135855425,
+          "final_anchor_shift": 0.019244595761262605,
+          "lockouts": 1.1
+        },
+        "mimicry_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.13,
+          "promotion_rate": 0.1,
+          "mean_anchor_shift": 0.029086018194039408,
+          "max_anchor_shift": 0.02999263167135275,
+          "mean_probability": 0.2500467676622859,
+          "final_anchor_shift": 0.02999263167135275,
+          "lockouts": 0.3
+        },
+        "gradual_walk_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.95,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.3578525067383629,
+          "final_anchor_shift": 0.0,
+          "lockouts": 9.5
+        },
+        "feedback_aware_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.35,
+          "promotion_rate": 0.04,
+          "mean_anchor_shift": 0.006896889360889402,
+          "max_anchor_shift": 0.006896889360889402,
+          "mean_probability": 0.17263744267509226,
+          "final_anchor_shift": 0.006896889360889402,
+          "lockouts": 3.1
+        }
+      }
+    },
+    "anchor_bounded": {
+      "genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.27,
+        "promotion_rate": 0.09,
+        "mean_anchor_shift": 0.023739819204861245,
+        "max_anchor_shift": 0.030965514333516925,
+        "mean_probability": 0.1542761261370928
+      },
+      "future_genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.22000000000000003,
+        "promotion_rate": 0.07,
+        "mean_anchor_shift": 0.015160641759174998,
+        "max_anchor_shift": 0.024255137427220696,
+        "mean_probability": 0.10588812709822668
+      },
+      "attackers": {
+        "random_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.47000000000000003,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.11024875173388429,
+          "final_anchor_shift": 0.0,
+          "lockouts": 4.7
+        },
+        "replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.35000000000000003,
+          "promotion_rate": 0.1,
+          "mean_anchor_shift": 0.014021434529935914,
+          "max_anchor_shift": 0.018221756790892364,
+          "mean_probability": 0.5169565210631175,
+          "final_anchor_shift": 0.018221756790892364,
+          "lockouts": 2.5
+        },
+        "time_scaled_replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.34,
+          "promotion_rate": 0.1,
+          "mean_anchor_shift": 0.020282126850484302,
+          "max_anchor_shift": 0.026788874694259623,
+          "mean_probability": 0.25555496224650454,
+          "final_anchor_shift": 0.026788874694259623,
+          "lockouts": 2.4
+        },
+        "mimicry_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.13,
+          "promotion_rate": 0.1,
+          "mean_anchor_shift": 0.029086018194039408,
+          "max_anchor_shift": 0.02999263167135275,
+          "mean_probability": 0.2500467676622859,
+          "final_anchor_shift": 0.02999263167135275,
+          "lockouts": 0.3
+        },
+        "gradual_walk_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.95,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.3578525067383629,
+          "final_anchor_shift": 0.0,
+          "lockouts": 9.5
+        },
+        "feedback_aware_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.35,
+          "promotion_rate": 0.04,
+          "mean_anchor_shift": 0.006957042136580294,
+          "max_anchor_shift": 0.006957042136580292,
+          "mean_probability": 0.1726475468223903,
+          "final_anchor_shift": 0.006957042136580292,
+          "lockouts": 3.1
+        }
+      }
+    },
+    "quarantine_consensus_anchor": {
+      "genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.66,
+        "promotion_rate": 0.04,
+        "mean_anchor_shift": 0.012037786671682784,
+        "max_anchor_shift": 0.030900137977876156,
+        "mean_probability": 0.1840126900972469
+      },
+      "future_genuine": {
+        "attempts": 10.0,
+        "accept_rate": 0.43,
+        "promotion_rate": 0.01,
+        "mean_anchor_shift": 0.003352625962274819,
+        "max_anchor_shift": 0.008381564905687047,
+        "mean_probability": 0.10280426407317826
+      },
+      "attackers": {
+        "random_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.47000000000000003,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.11024875173388429,
+          "final_anchor_shift": 0.0,
+          "lockouts": 4.7
+        },
+        "replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.8,
+          "promotion_rate": 0.05,
+          "mean_anchor_shift": 0.00400599086549689,
+          "max_anchor_shift": 0.00871241739205742,
+          "mean_probability": 0.6967712251147186,
+          "final_anchor_shift": 0.00871241739205742,
+          "lockouts": 5.5
+        },
+        "time_scaled_replay_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.9200000000000002,
+          "promotion_rate": 0.01,
+          "mean_anchor_shift": 0.0020493806172103787,
+          "max_anchor_shift": 0.004098761234420757,
+          "mean_probability": 0.3745528911793544,
+          "final_anchor_shift": 0.004098761234420757,
+          "lockouts": 7.2
+        },
+        "mimicry_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.74,
+          "promotion_rate": 0.05,
+          "mean_anchor_shift": 0.01789504309137286,
+          "max_anchor_shift": 0.03197054747728338,
+          "mean_probability": 0.34963094629004715,
+          "final_anchor_shift": 0.03197054747728338,
+          "lockouts": 5.0
+        },
+        "gradual_walk_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.95,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.3578525067383629,
+          "final_anchor_shift": 0.0,
+          "lockouts": 9.5
+        },
+        "feedback_aware_attacker": {
+          "attempts": 10.0,
+          "accept_rate": 0.49000000000000005,
+          "promotion_rate": 0.0,
+          "mean_anchor_shift": 0.0,
+          "max_anchor_shift": 0.0,
+          "mean_probability": 0.12544967076560823,
+          "final_anchor_shift": 0.0,
+          "lockouts": 4.7
+        }
+      }
+    }
+  },
+  "seed": 20260726,
+  "seconds": 191.20532250404358,
+  "dataset": {
+    "rows": 20400,
+    "subjects": 51,
+    "reps_per_subject": 400,
+    "sessions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "keys": 11,
+    "raw_features": 31,
+    "extended_features": 56
+  }
+}

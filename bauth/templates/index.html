@@ -39,6 +39,9 @@
             <option value="2" selected>2 &ndash; Easy (more forgiving)</option>
           </select>
         </label>
+        <label>Adaptation
+          <select id="reg-policy"></select>
+        </label>
       </div>
 
       <button id="reg-start" class="primary">Start enrollment</button>
@@ -82,6 +85,9 @@
         <label>User ID <input type="text" id="ret-user" placeholder="e.g. demo" autocomplete="off"></label>
         <label>Password <input type="password" id="ret-pass" autocomplete="current-password"></label>
         <label>Samples <input type="number" id="ret-n" value="5" min="1" max="20"></label>
+        <label>Adaptation
+          <select id="ret-policy"></select>
+        </label>
       </div>
 
       <button id="ret-start" class="primary">Start retraining</button>

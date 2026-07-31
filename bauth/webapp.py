@@ -19,7 +19,7 @@ import socket
 
 from flask import Flask, jsonify, render_template, request
 
-from . import adaptive, capture, config, context, features, models, storage
+from . import adaptive, attacks, capture, config, context, features, models, policies, quality, simulator, storage
 
 app = Flask(__name__)
 
@@ -107,6 +107,7 @@ def _profile_summary(profile):
         "max_samples": config.MAX_AUTHENTIC_SAMPLES,
         "features": profile.feature_dim,
         "threshold": round(adaptive.dynamic_threshold(profile), 3),
+        "adaptation_policy": profile.adaptation_policy,
         "status": adaptive.status(profile),
     }
 
@@ -146,6 +147,7 @@ def api_register():
     user_id = (payload.get("user_id") or "").strip()
     password = payload.get("password") or ""
     choice = models.normalize_choice(payload.get("model_choice", 1))
+    policy_name = payload.get("adaptation_policy") or config.DEFAULT_ADAPTATION_POLICY
     samples = payload.get("samples", [])
 
     if not user_id or not password:
@@ -158,9 +160,10 @@ def api_register():
         rec = _capture_from_request(entry, password)
         if not rec.complete:
             continue
-        collected.append(
-            (features.from_capture(rec, extended=config.EXTENDED_FEATURES), _client_context())
-        )
+        vector = features.from_capture(rec, extended=config.EXTENDED_FEATURES)
+        report = quality.assess_capture(rec, vector)
+        if report.acceptable:
+            collected.append((vector, _client_context()))
 
     if len(collected) < config.ENROLL_SAMPLES:
         return (
@@ -175,6 +178,7 @@ def api_register():
         )
 
     profile, info = adaptive.enroll(user_id, password, collected, choice_train=choice)
+    profile.adaptation_policy = policies.get_policy(policy_name).name
     storage.save(profile)
     return jsonify({"ok": True, "info": info, "profile": _profile_summary(profile)})
 
@@ -197,8 +201,9 @@ def api_verify():
         return jsonify({"ok": False, "error": "The password was not typed correctly."}), 400
 
     vector = features.from_capture(rec, extended=profile.extended)
+    report = quality.assess_capture(rec, vector, profile=profile)
     ctx = _client_context()
-    result = adaptive.verify(profile, vector, ctx)
+    result = adaptive.verify(profile, vector, ctx, quality_report=report)
     storage.save(profile)
 
     analysis = result.failure_analysis
@@ -207,16 +212,27 @@ def api_verify():
             "ok": True,
             "authenticated": result.authenticated,
             "probability": round(result.probability, 4),
+            "disagreement": round(result.disagreement, 4),
+            "anchor_distance": round(result.anchor_distance, 4),
             "base_threshold": round(result.base_threshold, 4),
             "required": round(result.required, 4),
             "reason": result.reason,
             "adopted": result.adopted,
             "retrained": result.retrained,
+            "quarantined": result.quarantined,
             "lockout": result.lockout,
             "risk": {
                 "score": round(result.assessment.score, 3),
                 "level": result.assessment.level,
                 "factors": result.assessment.factors,
+            },
+            "detectors": {
+                key: round(value, 4) for key, value in result.detector_scores.items()
+            },
+            "quality": {
+                "score": round(result.quality_score, 3),
+                "flags": result.quality_flags,
+                "fingerprint": result.sample_fingerprint,
             },
             "context": _context_view(ctx),
             "timing": {
@@ -243,6 +259,7 @@ def api_retrain():
     payload = request.get_json(silent=True) or {}
     user_id = (payload.get("user_id") or "").strip()
     password = payload.get("password") or ""
+    policy_name = payload.get("adaptation_policy")
 
     profile = storage.load(user_id)
     if profile is None:
@@ -260,14 +277,18 @@ def api_retrain():
     collected = []
     for entry in payload.get("samples", []):
         rec = _capture_from_request(entry, password)
-        if rec.complete:
-            collected.append(
-                (features.from_capture(rec, extended=profile.extended), _client_context())
-            )
+        if not rec.complete:
+            continue
+        vector = features.from_capture(rec, extended=profile.extended)
+        report = quality.assess_capture(rec, vector, profile=profile)
+        if report.acceptable:
+            collected.append((vector, _client_context()))
 
     if not collected:
         return jsonify({"ok": False, "error": "No usable samples were captured."}), 400
 
+    if policy_name:
+        profile.adaptation_policy = policies.get_policy(policy_name).name
     info, drift = adaptive.retrain(profile, collected, choice_train=payload.get("model_choice"))
     storage.save(profile)
     return jsonify(
@@ -294,14 +315,77 @@ def api_status(user_id):
             "profile": _profile_summary(profile),
             "drift": {
                 "detected": drift.detected,
+                "state": drift.state,
                 "magnitude": round(drift.magnitude, 3),
                 "speed_change": round(drift.speed_change, 1),
                 "message": drift.message,
+                "recommendation": drift.recommendation,
             },
             "failures": {"verdict": failures.verdict, "count": failures.count,
                          "message": failures.message},
             "events": profile.history[-8:],
+            "versions": profile.versions[-5:],
             "contexts": profile.context_history[-5:],
+        }
+    )
+
+
+@app.route("/api/simulate", methods=["POST"])
+def api_simulate():
+    payload = request.get_json(silent=True) or {}
+    user_id = (payload.get("user_id") or "").strip()
+    strategy_name = payload.get("attacker") or "random_attacker"
+    steps = int(payload.get("steps") or 10)
+    policy_name = payload.get("adaptation_policy")
+    persist = bool(payload.get("persist"))
+
+    if not user_id:
+        return jsonify({"ok": False, "error": "User ID is required."}), 400
+    if steps < 1 or steps > 200:
+        return jsonify({"ok": False, "error": "Steps must be between 1 and 200."}), 400
+
+    profile = storage.load(user_id)
+    if profile is None:
+        return jsonify({"ok": False, "error": f"User '{user_id}' does not exist."}), 404
+
+    active_policy = profile.adaptation_policy if not policy_name else policies.get_policy(policy_name).name
+    sim = simulator.PoisoningSimulator(profile, adaptation_policy=active_policy)
+    strategy = attacks.build_strategy(strategy_name)
+    steps_out = sim.run_strategy(strategy, steps=steps)
+    summary = sim.summary()
+
+    if persist:
+        storage.save(sim.profile)
+
+    return jsonify(
+        {
+            "ok": True,
+            "policy": active_policy,
+            "attacker": strategy_name,
+            "persisted": persist,
+            "summary": summary,
+            "steps": [
+                {
+                    "index": entry.index,
+                    "source": entry.source,
+                    "attack": entry.attack,
+                    "authenticated": entry.authenticated,
+                    "adaptation_eligible": entry.adaptation_eligible,
+                    "quarantined": entry.quarantined,
+                    "promoted": entry.promoted,
+                    "profile_shift": round(entry.profile_shift, 4),
+                    "anchor_shift": round(entry.anchor_shift, 4),
+                    "probability": round(entry.probability, 4),
+                    "anchor_distance": round(entry.anchor_distance, 4),
+                    "disagreement": round(entry.disagreement, 4),
+                    "context_risk": round(entry.context_risk, 4),
+                    "quality_score": round(entry.quality_score, 4),
+                    "quality_flags": entry.quality_flags,
+                    "lockout": entry.lockout,
+                    "risk_level": entry.risk_level,
+                }
+                for entry in steps_out
+            ],
         }
     )
 
@@ -320,6 +404,11 @@ def api_config():
             "enroll_samples": config.ENROLL_SAMPLES,
             "retrain_samples": config.RETRAIN_SAMPLES,
             "static_threshold": config.STATIC_THRESHOLD,
+            "auth_threshold_floor": config.AUTH_THRESHOLD_FLOOR,
+            "update_threshold_floor": config.UPDATE_THRESHOLD_FLOOR,
+            "default_adaptation_policy": config.DEFAULT_ADAPTATION_POLICY,
+            "adaptation_policies": sorted(policies.POLICIES),
+            "attack_strategies": sorted(attacks.ATTACK_STRATEGIES),
             "server": {"host": socket.gethostname(), "os": platform.system()},
         }
     )
