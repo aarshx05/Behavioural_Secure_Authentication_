@@ -62,6 +62,15 @@ class VerificationResult:
     quality_flags: list = field(default_factory=list)
     sample_fingerprint: str = ""
     trust_score: float = 0.0
+    promoted_count: int = 0
+    promoted_truth_counts: dict = field(default_factory=dict)
+
+
+@dataclass
+class PromotionOutcome:
+    promoted: bool = False
+    count: int = 0
+    truth_counts: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -71,6 +80,8 @@ class AdaptationRuntime:
     context: object
     result: VerificationResult
     timestamp: float
+    sample_source: str = "unknown"
+    sample_metadata: dict = field(default_factory=dict)
 
     @property
     def thresholds(self):
@@ -130,6 +141,8 @@ class AdaptationRuntime:
 
     def _entry(self):
         self.result.trust_score = _trust_score(self.result)
+        metadata = dict(self.sample_metadata or {})
+        attack_name = metadata.get("attack") or metadata.get("generator") or ""
         return {
             "features": np.asarray(self.vector, dtype=float),
             "score": float(self.result.probability),
@@ -142,6 +155,9 @@ class AdaptationRuntime:
             "timestamp": float(self.timestamp),
             "context": None if self.context is None else self.context.to_dict(),
             "sample_fingerprint": self.result.sample_fingerprint,
+            "truth_source": str(self.sample_source or metadata.get("truth_source") or "unknown"),
+            "attack": str(attack_name),
+            "metadata": metadata,
         }
 
     def queue_quarantine(self):
@@ -150,19 +166,35 @@ class AdaptationRuntime:
             self.profile.quarantine = self.profile.quarantine[-config.QUARANTINE_MAX_SAMPLES :]
         self.result.quarantined = True
 
-    def maybe_promote_quarantine(self):
-        _maybe_promote_quarantine(self.profile, self.result)
+    def maybe_promote_quarantine(self, bounded=True, enforce_bounds=True):
+        _maybe_promote_quarantine(
+            self.profile,
+            self.result,
+            bounded=bounded,
+            enforce_bounds=enforce_bounds,
+        )
 
-    def promote_immediately(self, reason, bounded=False, immediate_refit=True):
+    def promote_immediately(
+        self,
+        reason,
+        bounded=False,
+        immediate_refit=True,
+        enforce_bounds=True,
+    ):
         entry = self._entry()
         sample = entry["features"]
         if bounded:
             sample = _bounded_vector(self.profile, sample, entry["trust_score"])
-        allowed, message = _promotion_allowed(self.profile, [entry["features"]], [sample])
+        allowed, message = _promotion_allowed(
+            self.profile,
+            [entry["features"]],
+            [sample],
+            enforce_bounds=enforce_bounds,
+        )
         if not allowed:
             self.result.lockout = message
             return False
-        promoted = _promote_samples(
+        outcome = _promote_samples(
             self.profile,
             [
                 {
@@ -173,9 +205,11 @@ class AdaptationRuntime:
             reason=reason,
             refit=immediate_refit,
         )
-        self.result.adopted = promoted
-        self.result.retrained = promoted and immediate_refit
-        return promoted
+        self.result.adopted = outcome.promoted
+        self.result.retrained = outcome.promoted and immediate_refit
+        self.result.promoted_count = outcome.count
+        self.result.promoted_truth_counts = dict(outcome.truth_counts)
+        return outcome.promoted
 
 
 def _core_slice(profile):
@@ -493,7 +527,7 @@ def _bounded_vector(profile, vector, trust_score):
     return profile.active_centroid + config.PROMOTION_ALPHA * float(np.clip(trust_score, 0.0, 1.0)) * clipped
 
 
-def _promotion_allowed(profile, raw_candidates, promoted_candidates):
+def _promotion_allowed(profile, raw_candidates, promoted_candidates, enforce_bounds=True):
     raw_matrix = np.atleast_2d(np.asarray(raw_candidates, dtype=float))
     matrix = np.atleast_2d(np.asarray(promoted_candidates, dtype=float))
     if len(matrix) == 0:
@@ -506,21 +540,22 @@ def _promotion_allowed(profile, raw_candidates, promoted_candidates):
     if consistency > consistency_limit:
         return False, f"quarantine cluster is too loose ({consistency:.2f} sd)"
 
-    proposed = np.vstack([profile.active_samples, matrix])
-    proposed_center = np.median(proposed, axis=0)
-    total_shift = _anchor_shift(proposed_center, profile)
-    if total_shift > profile.thresholds.get("anchor_total", config.MAX_TEMPLATE_DRIFT):
-        return False, f"promotion would move the active profile {total_shift:.2f} sd from the anchor"
+    if enforce_bounds:
+        proposed = np.vstack([profile.active_samples, matrix])
+        proposed_center = np.median(proposed, axis=0)
+        total_shift = _anchor_shift(proposed_center, profile)
+        if total_shift > profile.thresholds.get("anchor_total", config.MAX_TEMPLATE_DRIFT):
+            return False, f"promotion would move the active profile {total_shift:.2f} sd from the anchor"
 
-    scale = _anchor_scale(profile)
-    if scale is not None and profile.active_centroid is not None:
-        core = _core_slice(profile)
-        step = np.abs(proposed_center[core] - profile.active_centroid[core]) / scale[core]
-        if float(np.mean(step)) > config.MAX_PROMOTION_SHIFT:
-            return False, "promotion step is too large"
-        feature_shift = np.abs(proposed_center[core] - profile.anchor_centroid[core]) / scale[core]
-        if float(np.max(feature_shift)) > config.PER_FEATURE_DRIFT_LIMIT:
-            return False, "one or more timing features moved too far from the anchor"
+        scale = _anchor_scale(profile)
+        if scale is not None and profile.active_centroid is not None:
+            core = _core_slice(profile)
+            step = np.abs(proposed_center[core] - profile.active_centroid[core]) / scale[core]
+            if float(np.mean(step)) > config.MAX_PROMOTION_SHIFT:
+                return False, "promotion step is too large"
+            feature_shift = np.abs(proposed_center[core] - profile.anchor_centroid[core]) / scale[core]
+            if float(np.max(feature_shift)) > config.PER_FEATURE_DRIFT_LIMIT:
+                return False, "one or more timing features moved too far from the anchor"
 
     return True, ""
 
@@ -539,14 +574,26 @@ def _trust_score(result):
 
 def _promote_samples(profile, entries, reason, refit=True):
     if not entries:
-        return False
+        return PromotionOutcome()
     before = template_drift(profile)
+    truth_counts = {}
     for entry in entries:
+        truth_source = str(entry.get("truth_source") or "unknown")
+        truth_counts[truth_source] = truth_counts.get(truth_source, 0) + 1
         profile.add_sample(
             entry["features"],
             context=entry.get("context"),
             source="auto",
             timestamp=entry.get("timestamp"),
+            metadata={
+                "truth_source": truth_source,
+                "attack": entry.get("attack", ""),
+                "score": float(entry.get("score", 0.0)),
+                "trust_score": float(entry.get("trust_score", 0.0)),
+                "anchor_distance": float(entry.get("anchor_distance", 0.0)),
+                "disagreement": float(entry.get("disagreement", 0.0)),
+                "metadata": dict(entry.get("metadata") or {}),
+            },
         )
         profile.record_sample_fingerprint(
             entry.get("sample_fingerprint"),
@@ -565,10 +612,10 @@ def _promote_samples(profile, entries, reason, refit=True):
         anchor_shift=after,
         trust=float(np.mean([entry.get("trust_score", 0.0) for entry in entries])),
     )
-    return True
+    return PromotionOutcome(promoted=True, count=len(entries), truth_counts=truth_counts)
 
 
-def _maybe_promote_quarantine(profile, result):
+def _maybe_promote_quarantine(profile, result, bounded=True, enforce_bounds=True):
     if len(profile.quarantine) < config.QUARANTINE_MIN_SAMPLES:
         return
 
@@ -581,10 +628,17 @@ def _maybe_promote_quarantine(profile, result):
     promoted_candidates = np.array(
         [
             _bounded_vector(profile, entry["features"], entry.get("trust_score", 0.0))
+            if bounded
+            else np.asarray(entry["features"], dtype=float)
             for entry in ordered
         ]
     )
-    allowed, reason = _promotion_allowed(profile, raw_candidates, promoted_candidates)
+    allowed, reason = _promotion_allowed(
+        profile,
+        raw_candidates,
+        promoted_candidates,
+        enforce_bounds=enforce_bounds,
+    )
     if not allowed:
         result.lockout = reason
         return
@@ -592,14 +646,21 @@ def _maybe_promote_quarantine(profile, result):
     entries = []
     for entry, promoted in zip(ordered, promoted_candidates):
         entries.append({**entry, "features": promoted})
-    promoted = _promote_samples(profile, entries, reason="quarantine_promotion", refit=True)
-    result.adopted = promoted
-    result.retrained = promoted
+    outcome = _promote_samples(profile, entries, reason="quarantine_promotion", refit=True)
+    result.adopted = outcome.promoted
+    result.retrained = outcome.promoted
+    result.promoted_count = outcome.count
+    result.promoted_truth_counts = dict(outcome.truth_counts)
 
 
 def retrain(profile, samples, choice_train=None, source="retrain"):
     for vector, context in samples:
-        profile.add_sample(vector, context=context, source=source)
+        profile.add_sample(
+            vector,
+            context=context,
+            source=source,
+            metadata={"truth_source": "genuine"},
+        )
 
     drift_before = detect_drift(profile)
     profile.policy_state = {}
@@ -629,7 +690,12 @@ def enroll(user_id, password, samples, choice_train=1):
     )
     profile.set_password(password)
     for vector, context in samples:
-        profile.add_sample(vector, context=context, source="enroll")
+        profile.add_sample(
+            vector,
+            context=context,
+            source="enroll",
+            metadata={"truth_source": "genuine"},
+        )
 
     profile.set_anchor(samples=profile.active_samples)
     info = fit_profile(profile, choice_train=choice_train)
@@ -637,7 +703,15 @@ def enroll(user_id, password, samples, choice_train=1):
     return profile, info
 
 
-def _maybe_queue_adaptation(profile, vector, context, result, timestamp=None):
+def _maybe_queue_adaptation(
+    profile,
+    vector,
+    context,
+    result,
+    timestamp=None,
+    sample_source="unknown",
+    sample_metadata=None,
+):
     if not config.ADAPTIVE_LEARNING or profile.is_legacy:
         return
     runtime = AdaptationRuntime(
@@ -646,12 +720,22 @@ def _maybe_queue_adaptation(profile, vector, context, result, timestamp=None):
         context=context,
         result=result,
         timestamp=time.time() if timestamp is None else float(timestamp),
+        sample_source=str(sample_source or "unknown"),
+        sample_metadata=dict(sample_metadata or {}),
     )
     policy = policies.get_policy(profile.adaptation_policy)
     policy.on_authentication(runtime)
 
 
-def verify(profile, vector, context, quality_report=None, timestamp=None):
+def verify(
+    profile,
+    vector,
+    context,
+    quality_report=None,
+    timestamp=None,
+    sample_source="unknown",
+    sample_metadata=None,
+):
     analysis = models.analyse(profile.model, vector)
     probability = float(analysis["fused"][0])
     disagreement = float(analysis["disagreement"][0])
@@ -702,7 +786,15 @@ def verify(profile, vector, context, quality_report=None, timestamp=None):
     profile.record_sample_fingerprint(result.sample_fingerprint, source="accepted")
     profile.recent_failures = []
 
-    _maybe_queue_adaptation(profile, vector, context, result, timestamp=timestamp)
+    _maybe_queue_adaptation(
+        profile,
+        vector,
+        context,
+        result,
+        timestamp=timestamp,
+        sample_source=sample_source,
+        sample_metadata=sample_metadata,
+    )
     return result
 
 

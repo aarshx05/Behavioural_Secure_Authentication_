@@ -16,23 +16,23 @@ from evaluation import adversarial, cmu
 def _print_summary(results):
     print("\nAdversarial summary")
     for policy_name, policy in results["summary"].items():
-        genuine = policy["genuine"]
-        future_genuine = policy["future_genuine"]
-        print(
-            f"\n{policy_name}\n"
-            f"  genuine accept rate   {genuine['accept_rate']:.3f}\n"
-            f"  genuine promotion     {genuine['promotion_rate']:.3f}\n"
-            f"  genuine max shift     {genuine['max_anchor_shift']:.3f}\n"
-            f"  future accept rate    {future_genuine['accept_rate']:.3f}\n"
-            f"  future promotion      {future_genuine['promotion_rate']:.3f}"
-        )
-        for attacker_name, attack in policy["attackers"].items():
+        print(f"\n{policy_name}")
+        for horizon in results["horizons"]:
+            horizon_key = str(horizon)
+            genuine = policy["genuine"]["horizons"][horizon_key]
             print(
-                f"  {attacker_name:<28} "
-                f"accept {attack['accept_rate']:.3f}  "
-                f"promote {attack['promotion_rate']:.3f}  "
-                f"max-shift {attack['max_anchor_shift']:.3f}"
+                f"  horizon {horizon:>3}  "
+                f"genuine accept {genuine['genuine_acceptance_rate']['mean']:.3f}  "
+                f"final shift {genuine['final_anchor_displacement']['mean']:.3f}"
             )
+            for attacker_name, attack in policy["attackers"].items():
+                attack_h = attack["horizons"][horizon_key]
+                print(
+                    f"    {attacker_name:<26} "
+                    f"accept {attack_h['authentication_acceptance_rate']['mean']:.3f}  "
+                    f"promote {attack_h['attacker_promotion_rate']['mean']:.3f}  "
+                    f"takeover {attack_h['takeover_success']['mean']:.3f}"
+                )
 
 
 def main():
@@ -40,8 +40,12 @@ def main():
     parser.add_argument("--data", default=cmu.DEFAULT_PATH)
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--limit", type=int, help="evaluate the first N subjects only")
-    parser.add_argument("--genuine-steps", type=int, default=20)
-    parser.add_argument("--attacker-steps", type=int, default=20)
+    parser.add_argument(
+        "--horizons",
+        type=int,
+        nargs="*",
+        default=list(adversarial.DEFAULT_HORIZONS),
+    )
     parser.add_argument("--max-train-samples", type=int, default=60)
     parser.add_argument("--policies", nargs="*")
     parser.add_argument("--attackers", nargs="*")
@@ -65,8 +69,7 @@ def main():
         subjects=subjects,
         policies=policies,
         attackers=attackers,
-        genuine_steps=args.genuine_steps,
-        attacker_steps=args.attacker_steps,
+        horizons=args.horizons,
         max_train_samples=args.max_train_samples,
         progress=True,
     )

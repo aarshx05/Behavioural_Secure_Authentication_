@@ -178,7 +178,7 @@ class Profile:
         if touch_time:
             self.anchor_time = time.time()
 
-    def add_sample(self, vector, context=None, source="enroll", timestamp=None):
+    def add_sample(self, vector, context=None, source="enroll", timestamp=None, metadata=None):
         vector = np.asarray(vector, dtype=float).reshape(1, -1)
         if self.active_samples is None or len(self.active_samples) == 0:
             self.active_samples = vector
@@ -192,13 +192,14 @@ class Profile:
             else:
                 context_dict = context.to_dict()
 
-        self.sample_meta.append(
-            {
-                "timestamp": timestamp if timestamp is not None else time.time(),
-                "source": source,
-                "context": context_dict,
-            }
-        )
+        entry = {
+            "timestamp": timestamp if timestamp is not None else time.time(),
+            "source": source,
+            "context": context_dict,
+        }
+        if metadata:
+            entry.update(deepcopy(metadata))
+        self.sample_meta.append(entry)
         if context_dict is not None:
             self.context_history.append(context_dict)
 

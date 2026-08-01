@@ -78,6 +78,14 @@ class PolicyRegistryTests(unittest.TestCase):
         policy = policies.get_policy("quarantine_consensus_anchor")
         self.assertEqual(policy.name, "quarantine_consensus_anchor")
         self.assertEqual(
+            policies.get_policy("quarantine_anchor").name,
+            "quarantine_anchor",
+        )
+        self.assertEqual(
+            policies.get_policy("quarantine_consensus_no_anchor").name,
+            "quarantine_consensus_no_anchor",
+        )
+        self.assertEqual(
             policies.get_policy("does-not-exist").name,
             "quarantine_consensus_anchor",
         )
@@ -105,6 +113,33 @@ class SimulatorTests(unittest.TestCase):
         self.assertEqual(summary["steps"], 3)
         self.assertIn("accept_rate", summary)
         self.assertIn("max_anchor_shift", summary)
+
+    def test_simulator_tracks_profile_provenance(self):
+        ctx = context.CaptureContext(
+            hostname="host-a",
+            local_ip="192.168.1.20",
+            timezone_name="UTC",
+            os_name="Linux",
+            machine="x86_64",
+        )
+        samples = [(_vector(i * 0.002), ctx) for i in range(10)]
+        profile, _ = adaptive.enroll("sim-user-provenance", "abcd", samples)
+        profile.thresholds["update"] = 0.0
+        profile.thresholds["disagreement"] = 1.0
+        profile.thresholds["anchor_candidate"] = 10.0
+        profile.adaptation_policy = "naive_accepted_update"
+
+        sim = simulator.PoisoningSimulator(profile)
+        sample = attacks.AttackSample(
+            vector=_vector(0.001),
+            generator="unit_test_attack",
+            strength=0.5,
+            metadata={"attack": "unit_test_attack"},
+        )
+        step = sim.step(sample, source="attacker")
+
+        self.assertAlmostEqual(step.profile_attacker_fraction, 1.0 / 11.0, places=6)
+        self.assertGreaterEqual(step.profile_genuine_fraction, 0.0)
 
 
 if __name__ == "__main__":

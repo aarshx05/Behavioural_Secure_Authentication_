@@ -29,6 +29,12 @@ class SimulationStep:
     quality_flags: list = field(default_factory=list)
     lockout: str = ""
     risk_level: str = ""
+    promoted_count: int = 0
+    promoted_genuine_count: int = 0
+    promoted_attacker_count: int = 0
+    profile_size: int = 0
+    profile_genuine_fraction: float = 0.0
+    profile_attacker_fraction: float = 0.0
     metadata: dict = field(default_factory=dict)
 
 
@@ -65,6 +71,15 @@ class PoisoningSimulator:
         self.current_time = float(start_time)
         self.step_seconds = float(step_seconds)
 
+    def _profile_truth_counts(self):
+        counts = {}
+        for entry in self.profile.sample_meta:
+            truth_source = entry.get("truth_source")
+            if truth_source is None:
+                truth_source = "genuine" if entry.get("source") != "auto" else "unknown"
+            counts[str(truth_source)] = counts.get(str(truth_source), 0) + 1
+        return counts
+
     def _coerce_context(self, value):
         if value is None:
             return self.default_context
@@ -97,11 +112,16 @@ class PoisoningSimulator:
             ctx,
             quality_report=report,
             timestamp=step_time,
+            sample_source=source,
+            sample_metadata=sample_metadata,
         )
         after_shift = adaptive.template_drift(self.profile)
         self.last_result = result
         self.last_quality = report
         self.current_time += self.step_seconds
+        truth_counts = self._profile_truth_counts()
+        profile_size = max(sum(truth_counts.values()), 1)
+        promoted_truth_counts = dict(result.promoted_truth_counts or {})
 
         entry = SimulationStep(
             index=len(self.history),
@@ -125,6 +145,12 @@ class PoisoningSimulator:
             quality_flags=list(result.quality_flags),
             lockout=result.lockout,
             risk_level="" if result.assessment is None else result.assessment.level,
+            promoted_count=int(result.promoted_count),
+            promoted_genuine_count=int(promoted_truth_counts.get("genuine", 0)),
+            promoted_attacker_count=int(promoted_truth_counts.get("attacker", 0)),
+            profile_size=int(sum(truth_counts.values())),
+            profile_genuine_fraction=float(truth_counts.get("genuine", 0) / profile_size),
+            profile_attacker_fraction=float(truth_counts.get("attacker", 0) / profile_size),
             metadata=sample_metadata,
         )
         self.history.append(entry)

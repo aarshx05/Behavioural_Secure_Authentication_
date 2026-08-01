@@ -21,7 +21,11 @@ class NaiveAcceptedUpdatePolicy(AdaptationPolicy):
     name = "naive_accepted_update"
 
     def on_authentication(self, runtime):
-        runtime.promote_immediately("naive_accepted_update", bounded=False)
+        runtime.promote_immediately(
+            "naive_accepted_update",
+            bounded=False,
+            enforce_bounds=False,
+        )
 
 
 class HighConfidencePolicy(AdaptationPolicy):
@@ -34,7 +38,11 @@ class HighConfidencePolicy(AdaptationPolicy):
             require_replay_guard=True,
         ):
             return
-        runtime.promote_immediately("high_confidence", bounded=False)
+        runtime.promote_immediately(
+            "high_confidence",
+            bounded=False,
+            enforce_bounds=False,
+        )
 
 
 class SlidingWindowPolicy(AdaptationPolicy):
@@ -43,7 +51,11 @@ class SlidingWindowPolicy(AdaptationPolicy):
     def on_authentication(self, runtime):
         if not runtime.common_gate(require_quality=True, require_replay_guard=True):
             return
-        runtime.promote_immediately("sliding_window", bounded=False)
+        runtime.promote_immediately(
+            "sliding_window",
+            bounded=False,
+            enforce_bounds=False,
+        )
 
 
 class ConfidenceAndContextPolicy(AdaptationPolicy):
@@ -57,7 +69,11 @@ class ConfidenceAndContextPolicy(AdaptationPolicy):
             require_replay_guard=True,
         ):
             return
-        runtime.promote_immediately("confidence_and_context", bounded=False)
+        runtime.promote_immediately(
+            "confidence_and_context",
+            bounded=False,
+            enforce_bounds=False,
+        )
 
 
 class AnchorBoundedPolicy(AdaptationPolicy):
@@ -89,6 +105,38 @@ class ConsensusAnchorPolicy(AdaptationPolicy):
         ):
             return
         runtime.promote_immediately("consensus_anchor", bounded=True)
+
+
+class QuarantineAnchorPolicy(AdaptationPolicy):
+    name = "quarantine_anchor"
+
+    def on_authentication(self, runtime):
+        if not runtime.common_gate(
+            require_update_threshold=True,
+            require_context=True,
+            require_anchor=True,
+            require_quality=True,
+            require_replay_guard=True,
+        ):
+            return
+        runtime.queue_quarantine()
+        runtime.maybe_promote_quarantine(bounded=True, enforce_bounds=True)
+
+
+class QuarantineConsensusNoAnchorPolicy(AdaptationPolicy):
+    name = "quarantine_consensus_no_anchor"
+
+    def on_authentication(self, runtime):
+        if not runtime.common_gate(
+            require_update_threshold=True,
+            require_disagreement=True,
+            require_context=True,
+            require_quality=True,
+            require_replay_guard=True,
+        ):
+            return
+        runtime.queue_quarantine()
+        runtime.maybe_promote_quarantine(bounded=False, enforce_bounds=False)
 
 
 class QuarantineConsensusAnchorPolicy(AdaptationPolicy):
@@ -134,6 +182,8 @@ POLICIES = {
         ConfidenceAndContextPolicy(),
         AnchorBoundedPolicy(),
         ConsensusAnchorPolicy(),
+        QuarantineAnchorPolicy(),
+        QuarantineConsensusNoAnchorPolicy(),
         QuarantineConsensusAnchorPolicy(),
         SupervisedPeriodicUpdatePolicy(),
     )
