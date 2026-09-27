@@ -43,7 +43,14 @@ def _public_ip():
     if not config.ENABLE_PUBLIC_IP_LOOKUP:
         return None
     try:
+        from urllib.parse import urlparse
         from urllib.request import urlopen
+
+        # urllib will happily open file:// (and ftp://) URLs, so a tampered
+        # PUBLIC_IP_URL could turn this lookup into an arbitrary file read.
+        # Restrict the scheme to remote HTTP(S) endpoints only.
+        if urlparse(config.PUBLIC_IP_URL).scheme not in ("http", "https"):
+            return None
 
         with urlopen(config.PUBLIC_IP_URL, timeout=config.PUBLIC_IP_TIMEOUT) as resp:
             return resp.read().decode("utf-8").strip()[:64]
